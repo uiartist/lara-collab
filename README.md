@@ -73,7 +73,8 @@ LaraCollab, developed with Laravel and React, serves as a project management too
 
 9. You will be asked if you want to seed development data, for testing or development enter `yes`.
 10. Install composer dependencies with `composer install`
-11. Run `npm run dev`
+11. Run `php artisan serve`
+12. Run `npm run dev`
 
 > NOTE: [Laravel Sail](https://laravel.com/docs/10.x/sail#introduction) was used for development, so if you want you can use that.
 
