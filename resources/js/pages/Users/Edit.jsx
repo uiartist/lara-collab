@@ -1,5 +1,6 @@
 import ActionButton from "@/components/ActionButton";
-import BackButton from "@/components/BackButton";
+import { Button } from "@mantine/core";
+import { IconChevronLeft } from "@tabler/icons-react";
 import useForm from "@/hooks/useForm";
 import useRoles from "@/hooks/useRoles";
 import ContainerBox from "@/layouts/ContainerBox";
@@ -7,6 +8,7 @@ import Layout from "@/layouts/MainLayout";
 import { redirectTo } from "@/utils/route";
 import { getInitials } from "@/utils/user";
 import { usePage } from "@inertiajs/react";
+
 import {
   Anchor,
   Avatar,
@@ -173,8 +175,17 @@ const UserEdit = () => {
           />
 
           <Group justify="space-between" mt="xl">
-            <BackButton route="users.index" />
-            <ActionButton loading={form.processing}>Update</ActionButton>
+            <Button
+            leftSection={<IconChevronLeft size={14} />}
+            radius="xl"
+            variant="transparent"
+            size="lg"
+            onClick={() => redirectTo('users.index')}
+            >All Users</Button>
+            <div className="flex">
+            <ActionButton onClick={() => window.history.back()} className="me-4">Back</ActionButton>
+            <ActionButton loading={form.processing}>Save</ActionButton>
+            </div>
           </Group>
         </form>
       </ContainerBox>

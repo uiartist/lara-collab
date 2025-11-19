@@ -182,6 +182,17 @@ export function EditTaskDrawer() {
               Created by {task.created_by_user.name} on {date(task.created_at)}
             </Text>
           </Breadcrumbs>
+          <div style={{ gap: "10px" }} className='ms-4 d-flex justify-content-between'>
+            <div>
+            <button type="button" className="btn btn-primary me-4">Labor</button>
+            <button type="button" className="btn btn-warning me-4">Time</button>
+            <button type="button" className="btn btn-success me-4">Costs</button>
+            <button type="button" className="btn btn-secondary me-4">Material</button>
+            <button type="button" className="btn btn-info me-4">Inventory</button>
+            <button type="button" className="btn btn-info me-4">Reports</button>
+            </div>
+            <button type="button" className="btn btn-success">Save</button>
+          </div>
           <form className={classes.inner}>
             <div className={classes.content}>
               <TextInput

@@ -125,7 +125,7 @@ export default function Sidebar() {
         icon: IconSettings,
         active: route().current("settings.*"),
         opened: route().current("settings.*"),
-        visible: can("view owner company") || can("view roles") || can("view labels"),
+        visible: can("view owner company") || can("view roles") || can("view labels") || can("view configuration") || can("view development") || can("view security"),
         links: [
           {
             label: "Company",
@@ -144,6 +144,25 @@ export default function Sidebar() {
             link: route("settings.labels.index"),
             active: route().current("settings.labels.*"),
             visible: can("view labels"),
+          },
+          // create routes for below links
+          {
+            label: "Configuration",
+            link: route("settings.configuration.index"),
+            active: route().current("settings.configuration.*"),
+            visible: can("view configuration"),
+          },
+          {
+            label: "Development",
+            link: route("settings.development.index"),
+            active: route().current("settings.development.*"),
+            visible: can("view development"),
+          },
+          {
+            label: "Security",
+            link: route("settings.security.index"),
+            active: route().current("settings.security.*"),
+            visible: can("view security"),
           },
         ],
       },

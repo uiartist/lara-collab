@@ -30,6 +30,7 @@ class MyWorkTaskController extends Controller
                             ->with([
                                 'labels:id,name,color',
                                 'assignedToUser:id,name',
+                                'createdByUser:id,name',
                                 'taskGroup:id,name',
                             ]);
                     },
