@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -22,28 +22,21 @@ jobs:
           script: |
             cd /var/www/lara-collab
 
-            echo "Pulling latest code..."
-            git pull origin main
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
 
-            echo "Installing PHP dependencies..."
             composer install --no-dev --optimize-autoloader
 
-            echo "Installing Node dependencies..."
             npm install
-
-            echo "Building frontend (Vite)..."
             npm run build
 
-            echo "Running Laravel commands..."
-            php artisan migrate --force
-            php artisan optimize
-            php artisan storage:link || true
-
-            echo "Fixing permissions..."
             sudo chown -R www-data:www-data storage bootstrap/cache
             sudo chmod -R 775 storage bootstrap/cache
 
-            echo "Restarting web server..."
-            sudo systemctl restart apache2 || sudo systemctl restart nginx
+            sudo -u www-data php artisan optimize:clear
+            sudo -u www-data php artisan config:clear
+            sudo -u www-data php artisan route:clear
+            sudo -u www-data php artisan cache:clear
 
-            echo "✅ Deployment completed"
+            sudo systemctl reload apache2
