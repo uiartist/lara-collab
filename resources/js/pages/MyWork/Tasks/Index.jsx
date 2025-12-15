@@ -78,7 +78,7 @@ const TasksIndex = () => {
                 <Accordion.Panel>
                   <Stack gap={8}>
                     <table className='table table-striped table-bordered table-hover'>
-                      <thead className='table-light'>
+                      <thead className='table-dark'>
                         <tr>
                           <th scope='col'>#</th>
                           <th scope='col'>Task</th>
