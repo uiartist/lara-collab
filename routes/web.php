@@ -124,7 +124,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         Route::resource('labels', LabelController::class)->except(['show']);
         Route::post('labels/{labelId}/restore', [LabelController::class, 'restore'])->name('labels.restore');
-        
+
         // create routes for Configuration, Development and Security, similar to roles and labels above
         Route::resource('configuration', ConfigurationController::class)->except(['show']);
         Route::post('configuration/{configId}/restore', [ConfigurationController::class, 'restore'])->name('configuration.restore');
