@@ -25,7 +25,8 @@ export default function Task({ task }) {
                   truncate="end"
                   c={isOverdue(task) && task.completed_at === null ? "red" : ""}
                   onClick={() => redirectTo("projects.tasks.open", [task.project_id, task.id])}
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: "pointer", width: 300 }}
+                  title={task.name}
                 >
                   #{task.number + ": " + task.name}
                 </Text>
