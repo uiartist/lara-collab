@@ -11,7 +11,7 @@ class ConfigurationController extends Controller
 {
     public function __construct()
     {
-        //$this->authorizeResource(Configuration::class, 'configuration');
+        // $this->authorizeResource(Configuration::class, 'configuration');
     }
 
     public function index()
@@ -39,7 +39,7 @@ class ConfigurationController extends Controller
 
     public function edit(Configuration $configuration)
     {
-        //return Inertia::render('Settings/Configuration/Edit', compact('configuration'));
+        // return Inertia::render('Settings/Configuration/Edit', compact('configuration'));
     }
 
     public function update(Request $request, Configuration $configuration)
@@ -56,9 +56,9 @@ class ConfigurationController extends Controller
 
     public function destroy(Configuration $configuration)
     {
-        //$configuration->delete();
+        // $configuration->delete();
 
-        //return back()->with('success', 'Configuration archived.');
+        // return back()->with('success', 'Configuration archived.');
     }
 
     public function restore($id)

@@ -17,6 +17,7 @@ class SecurityController extends Controller
     public function index()
     {
         $items = Security::paginate(20);
+
         return Inertia::render('Settings/Security/Index', compact('items'));
     }
 

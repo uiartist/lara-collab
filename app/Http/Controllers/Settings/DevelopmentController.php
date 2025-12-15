@@ -17,6 +17,7 @@ class DevelopmentController extends Controller
     public function index()
     {
         $items = Development::paginate(20);
+
         return Inertia::render('Settings/Development/Index', compact('items'));
     }
 
