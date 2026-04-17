@@ -16,8 +16,59 @@ class ConfigurationController extends Controller
 
     public function index()
     {
-        // $items = Configuration::paginate(20);
-        // return Inertia::render('Settings/Configuration/Index', compact('items'));
+        // load users and available permissions for the UI
+        $users = \App\Models\User::orderBy('name')->get(['id', 'name']);
+        $permissions = \App\Models\Permission::orderBy('name')->get(['id', 'name']);
+
+        // 'label' column doesn't exist in DB; synthesize a display label from the name
+        $permissions = $permissions->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'label' => ucwords($p->name),
+            ];
+        });
+
+        // prepare permissions assigned to each user
+        $usersWithPermissions = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'permissions' => $user->getDirectPermissions()->pluck('id')->toArray(),
+            ];
+        });
+
+        // if there are no permissions in DB yet create a few sample permissions for demonstration
+        if ($permissions->isEmpty()) {
+            $sample = [
+                ['name' => 'view dashboard', 'label' => 'View dashboard'],
+                ['name' => 'view invoices', 'label' => 'View invoices'],
+                ['name' => 'manage projects', 'label' => 'Manage projects'],
+            ];
+            foreach ($sample as $s) {
+                \App\Models\Permission::firstOrCreate(['name' => $s['name']]);
+            }
+
+            $permissions = \App\Models\Permission::orderBy('name')->get(['id', 'name']);
+
+            // synthesize label for newly created permissions as well
+            $permissions = $permissions->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'label' => ucwords($p->name),
+                ];
+            });
+        }
+
+        $selectedUser = session('selected_user') ?? ($users->first()?->id ?? null);
+
+        return Inertia::render('Settings/Configuration/Index', [
+            'users' => $users,
+            'permissions' => $permissions,
+            'usersWithPermissions' => $usersWithPermissions,
+            'selectedUser' => $selectedUser,
+        ]);
     }
 
     public function create()
@@ -52,6 +103,27 @@ class ConfigurationController extends Controller
         $configuration->update($data);
 
         return redirect()->route('settings.configuration.index')->with('success', 'Configuration updated.');*/
+    }
+
+
+    /**
+     * Save permissions for a given user.
+     */
+    public function savePermissions(Request $request)
+    {
+        $data = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'integer|exists:permissions,id',
+        ]);
+
+        $user = \App\Models\User::findOrFail($data['user_id']);
+
+        $permissions = \App\Models\Permission::whereIn('id', $data['permissions'] ?? [])->get();
+
+        $user->syncPermissions($permissions);
+
+        return back()->success('Permissions updated', 'Permissions updated.')->with('selected_user', $user->id);
     }
 
     public function destroy(Configuration $configuration)

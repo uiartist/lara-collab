@@ -130,6 +130,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         // create routes for Configuration, Development and Security, similar to roles and labels above
         Route::resource('configuration', ConfigurationController::class)->except(['show']);
+        // Save permissions for users (UI under settings.configuration)
+        Route::post('configuration/permissions', [ConfigurationController::class, 'savePermissions'])->name('configuration.permissions');
         Route::post('configuration/{configId}/restore', [ConfigurationController::class, 'restore'])->name('configuration.restore');
 
         Route::resource('development', DevelopmentController::class)->except(['show']);
