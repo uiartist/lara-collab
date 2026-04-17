@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\Configuration;
+use App\Models\Permission;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,8 +19,8 @@ class ConfigurationController extends Controller
     public function index()
     {
         // load users and available permissions for the UI
-        $users = \App\Models\User::orderBy('name')->get(['id', 'name']);
-        $permissions = \App\Models\Permission::orderBy('name')->get(['id', 'name']);
+        $users = User::orderBy('name')->get(['id', 'name']);
+        $permissions = Permission::orderBy('name')->get(['id', 'name']);
 
         // 'label' column doesn't exist in DB; synthesize a display label from the name
         $permissions = $permissions->map(function ($p) {
@@ -46,10 +48,10 @@ class ConfigurationController extends Controller
                 ['name' => 'manage projects', 'label' => 'Manage projects'],
             ];
             foreach ($sample as $s) {
-                \App\Models\Permission::firstOrCreate(['name' => $s['name']]);
+                Permission::firstOrCreate(['name' => $s['name']]);
             }
 
-            $permissions = \App\Models\Permission::orderBy('name')->get(['id', 'name']);
+            $permissions = Permission::orderBy('name')->get(['id', 'name']);
 
             // synthesize label for newly created permissions as well
             $permissions = $permissions->map(function ($p) {
@@ -105,7 +107,6 @@ class ConfigurationController extends Controller
         return redirect()->route('settings.configuration.index')->with('success', 'Configuration updated.');*/
     }
 
-
     /**
      * Save permissions for a given user.
      */
@@ -117,9 +118,9 @@ class ConfigurationController extends Controller
             'permissions.*' => 'integer|exists:permissions,id',
         ]);
 
-        $user = \App\Models\User::findOrFail($data['user_id']);
+        $user = User::findOrFail($data['user_id']);
 
-        $permissions = \App\Models\Permission::whereIn('id', $data['permissions'] ?? [])->get();
+        $permissions = Permission::whereIn('id', $data['permissions'] ?? [])->get();
 
         $user->syncPermissions($permissions);
 
