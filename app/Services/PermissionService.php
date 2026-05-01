@@ -21,7 +21,7 @@ class PermissionService
             'TaskGroups' => ['create task group', 'edit task group', 'archive task group', 'restore task group', 'reorder task group'],
             'Tasks' => [
                 'view tasks', 'create task', 'edit task', 'archive task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
-                'view time logs', 'view comments',
+                'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
             'Invoices' => ['view invoices', 'create invoice', 'edit invoice', 'archive invoice', 'restore invoice', 'change invoice status', 'download invoice', 'print invoice'],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
@@ -33,7 +33,7 @@ class PermissionService
             'TaskGroups' => ['create task group', 'edit task group', 'archive task group', 'restore task group', 'reorder task group'],
             'Tasks' => [
                 'view tasks', 'create task', 'edit task', 'archive task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
-                'view time logs', 'view comments',
+                'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
         ],
@@ -41,26 +41,26 @@ class PermissionService
             'Project' => ['view projects', 'view project'],
             'Tasks' => [
                 'view tasks', 'create task', 'edit task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
-                'view time logs', 'view comments',
+                'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
         ],
         'qa engineer' => [
             'Project' => ['view projects', 'view project'],
             'Tasks' => [
-                'view tasks', 'create task', 'edit task', 'add time log', 'delete time log', 'view time logs', 'view comments',
+                'view tasks', 'create task', 'edit task', 'add time log', 'delete time log', 'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
         ],
         'designer' => [
             'Project' => ['view projects', 'view project'],
             'Tasks' => [
                 'view tasks', 'create task', 'edit task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
-                'view time logs', 'view comments',
+                'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
         ],
         'client' => [
             'Project' => ['view projects', 'view project'],
             'Tasks' => [
-                'view tasks', 'create task', 'view time logs', 'view comments',
+                'view tasks', 'create task', 'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
         ],
     ];

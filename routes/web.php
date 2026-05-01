@@ -22,6 +22,7 @@ use App\Http\Controllers\Task\AttachmentController;
 use App\Http\Controllers\Task\CommentController;
 use App\Http\Controllers\Task\GroupController;
 use App\Http\Controllers\Task\TimeLogController;
+use App\Http\Controllers\Task\TaskCostController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -73,6 +74,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::post('time-log/timer/start', [TimeLogController::class, 'startTimer'])->name('time-logs.timer.start');
             Route::post('time-log/{timeLog}/timer/stop', [TimeLogController::class, 'stopTimer'])->name('time-logs.timer.stop');
         })->scopeBindings();
+
+        // COSTS
+        Route::group(['prefix' => '{project}/tasks/{task}', 'as' => 'tasks.'], function () {
+            Route::get('costs', [TaskCostController::class, 'index'])->name('costs');
+            Route::post('costs', [TaskCostController::class, 'store'])->name('costs.store');
+            Route::delete('costs/{taskCost}', [TaskCostController::class, 'destroy'])->name('costs.destroy');
+        })->scopeBindings();
+
+        // PROJECT-LEVEL: task-wise costs for the whole project
+        Route::get('{project}/tasks/costs', [TaskCostController::class, 'projectCosts'])->name('tasks.costs.project');
 
         // COMMENTS
         Route::group(['prefix' => '{project}/tasks/{task}', 'as' => 'tasks.'], function () {

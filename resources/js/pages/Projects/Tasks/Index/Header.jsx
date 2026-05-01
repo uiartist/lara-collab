@@ -14,6 +14,9 @@ import {
   IconLayoutList,
   IconPlus,
 } from "@tabler/icons-react";
+import { IconCurrencyDollar } from "@tabler/icons-react";
+import { useState } from 'react';
+import TaskCostsModal from '@/components/TaskCostsModal';
 
 export default function Header() {
   const { project } = usePage().props;
@@ -25,6 +28,7 @@ export default function Header() {
   const { openCreateTask } = useTaskDrawerStore();
   const { hasUrlParams } = useTaskFiltersStore();
   const usingFilters = hasUrlParams(["archived"]);
+  const [costsOpened, setCostsOpened] = useState(false);
 
   return (
     <Grid justify="space-between" align="end">
@@ -90,8 +94,13 @@ export default function Header() {
               Add task
             </Button>
           )}
+          <ActionIcon title="Project Costs" onClick={() => setCostsOpened(true)}>
+            <IconCurrencyDollar />
+          </ActionIcon>
+          <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={project.id} task={null} />
         </Group>
       </Grid.Col>
     </Grid>
   );
 }
+

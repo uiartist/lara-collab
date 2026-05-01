@@ -21,6 +21,7 @@ import {
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import TaskCostsModal from '@/components/TaskCostsModal';
 import Comments from './Comments';
 import LabelsDropdown from './LabelsDropdown';
 import Timer from './Timer';
@@ -47,6 +48,8 @@ export function EditTaskDrawer() {
   }, []);
 
   const task = findTask(edit.task.id);
+
+  const [costsOpened, setCostsOpened] = useState(false);
 
   const [data, setData] = useState({
     group_id: '',
@@ -186,11 +189,12 @@ export function EditTaskDrawer() {
             <div>
             <button type="button" className="btn btn-primary me-4">Labor</button>
             <button type="button" className="btn btn-warning me-4">Time</button>
-            <button type="button" className="btn btn-success me-4">Costs</button>
+            <button type="button" className="btn btn-success me-4" onClick={() => setCostsOpened(true)}>Costs</button>
             <button type="button" className="btn btn-secondary me-4">Material</button>
             <button type="button" className="btn btn-info me-4">Inventory</button>
             <button type="button" className="btn btn-info me-4">Reports</button>
             </div>
+            <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
             <button type="button" className="btn btn-success">Save</button>
           </div>
           <form className={classes.inner}>

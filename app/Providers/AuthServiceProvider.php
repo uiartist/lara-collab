@@ -16,7 +16,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        // map TaskCost to its policy
+        App\Models\TaskCost::class => App\Policies\TaskCostPolicy::class,
     ];
 
     /**
