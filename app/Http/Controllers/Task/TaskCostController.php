@@ -47,6 +47,7 @@ class TaskCostController extends Controller
     {
         $this->authorize('delete', $taskCost);
         $taskCost->delete();
+
         return response()->json(['deleted' => true]);
     }
 

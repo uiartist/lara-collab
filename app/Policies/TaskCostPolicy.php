@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
+use App\Models\Permission;
 use App\Models\TaskCost;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Permission;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class TaskCostPolicy
 {
@@ -19,7 +20,7 @@ class TaskCostPolicy
 
         try {
             return $user->hasPermissionTo('add costs');
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist $e) {
             return false;
         }
     }
@@ -32,7 +33,7 @@ class TaskCostPolicy
 
         try {
             return $user->hasPermissionTo('delete costs');
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist $e) {
             return false;
         }
     }
@@ -45,7 +46,7 @@ class TaskCostPolicy
 
         try {
             return $user->hasPermissionTo('view costs');
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist $e) {
             return false;
         }
     }
@@ -58,7 +59,7 @@ class TaskCostPolicy
 
         try {
             return $user->hasPermissionTo('view costs');
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist $e) {
             return false;
         }
     }
