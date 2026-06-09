@@ -20,17 +20,17 @@ class StoreSubTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'                  => ['required', 'string', 'max:255'],
-            'assigned_to_user_id'   => ['nullable', 'exists:users,id'],
-            'description'           => ['nullable', 'string'],
-            'estimation'            => ['nullable', 'numeric', 'min:0'],
-            'pricing_type'          => ['required', 'string', Rule::enum(PricingType::class)],
-            'fixed_price'           => ['nullable', 'numeric', 'min:0'],
-            'due_on'                => ['nullable', 'date'],
-            'hidden_from_clients'   => ['required', 'boolean'],
-            'billable'              => ['required', 'boolean'],
-            'estimated_budget'      => ['nullable', 'numeric', 'min:0'],
-            'actual_budget'         => ['nullable', 'numeric', 'min:0'],
+            'name' => ['required', 'string', 'max:255'],
+            'assigned_to_user_id' => ['nullable', 'exists:users,id'],
+            'description' => ['nullable', 'string'],
+            'estimation' => ['nullable', 'numeric', 'min:0'],
+            'pricing_type' => ['required', 'string', Rule::enum(PricingType::class)],
+            'fixed_price' => ['nullable', 'numeric', 'min:0'],
+            'due_on' => ['nullable', 'date'],
+            'hidden_from_clients' => ['required', 'boolean'],
+            'billable' => ['required', 'boolean'],
+            'estimated_budget' => ['nullable', 'numeric', 'min:0'],
+            'actual_budget' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

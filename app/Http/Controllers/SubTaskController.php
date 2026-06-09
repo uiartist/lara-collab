@@ -43,24 +43,24 @@ class SubTaskController extends Controller
         }
 
         $subTask = $project->tasks()->create([
-            'parent_id'             => $parentTask->id,
-            'group_id'              => $parentTask->group_id,
-            'created_by_user_id'    => auth()->id(),
-            'assigned_to_user_id'   => $data['assigned_to_user_id'] ?? null,
-            'name'                  => $data['name'],
-            'number'                => $project->tasks()->withArchived()->count() + 1,
-            'description'           => $data['description'] ?? null,
-            'due_on'                => $data['due_on'] ?? null,
-            'estimation'            => $data['estimation'] ?? null,
-            'pricing_type'          => $data['pricing_type'],
-            'fixed_price'           => $data['fixed_price'] ?? null,
-            'hidden_from_clients'   => $data['hidden_from_clients'],
-            'billable'              => $data['billable'],
-            'depth'                 => $parentTask->depth + 1,
-            'estimated_budget'      => isset($data['estimated_budget']) && $data['estimated_budget'] !== null
+            'parent_id' => $parentTask->id,
+            'group_id' => $parentTask->group_id,
+            'created_by_user_id' => auth()->id(),
+            'assigned_to_user_id' => $data['assigned_to_user_id'] ?? null,
+            'name' => $data['name'],
+            'number' => $project->tasks()->withArchived()->count() + 1,
+            'description' => $data['description'] ?? null,
+            'due_on' => $data['due_on'] ?? null,
+            'estimation' => $data['estimation'] ?? null,
+            'pricing_type' => $data['pricing_type'],
+            'fixed_price' => $data['fixed_price'] ?? null,
+            'hidden_from_clients' => $data['hidden_from_clients'],
+            'billable' => $data['billable'],
+            'depth' => $parentTask->depth + 1,
+            'estimated_budget' => isset($data['estimated_budget']) && $data['estimated_budget'] !== null
                                         ? (int) round($data['estimated_budget'] * 100)
                                         : null,
-            'actual_budget'         => isset($data['actual_budget']) && $data['actual_budget'] !== null
+            'actual_budget' => isset($data['actual_budget']) && $data['actual_budget'] !== null
                                         ? (int) round($data['actual_budget'] * 100)
                                         : null,
         ]);

@@ -147,18 +147,18 @@ class TaskController extends Controller
         $task->load($costsWith);
 
         $toNode = fn ($t) => [
-            'id'               => $t->id,
-            'parent_id'        => $t->parent_id,
-            'name'             => $t->name,
-            'number'           => $t->number,
-            'depth'            => $t->depth,
+            'id' => $t->id,
+            'parent_id' => $t->parent_id,
+            'name' => $t->name,
+            'number' => $t->number,
+            'depth' => $t->depth,
             'estimated_budget' => $t->estimated_budget,
-            'costs_total'      => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
-            'costs'            => $t->taskCosts->map(fn ($c) => [
-                'id'     => $c->id,
+            'costs_total' => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
+            'costs' => $t->taskCosts->map(fn ($c) => [
+                'id' => $c->id,
                 'amount' => (float) $c->amount,
-                'date'   => $c->date,
-                'user'   => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
+                'date' => $c->date,
+                'user' => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
             ])->values(),
         ];
 
@@ -173,7 +173,7 @@ class TaskController extends Controller
 
         $data = $request->validate([
             'estimated_budget' => ['nullable', 'numeric', 'min:0'],
-            'actual_budget'    => ['nullable', 'numeric', 'min:0'],
+            'actual_budget' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $update = [];
@@ -189,7 +189,7 @@ class TaskController extends Controller
 
         return response()->json([
             'estimated_budget' => $task->estimated_budget,
-            'actual_budget'    => $task->actual_budget,
+            'actual_budget' => $task->actual_budget,
         ]);
     }
 

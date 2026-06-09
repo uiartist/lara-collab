@@ -18,13 +18,17 @@ return new class extends Migration
         }
 
         $computeDepth = function ($id) use (&$computeDepth, $byId, &$depths) {
-            if (isset($depths[$id])) return $depths[$id];
+            if (isset($depths[$id])) {
+                return $depths[$id];
+            }
             $parent = $byId[$id] ?? null;
             if (! $parent) {
                 $depths[$id] = 0;
+
                 return 0;
             }
             $depths[$id] = 1 + $computeDepth($parent);
+
             return $depths[$id];
         };
 
@@ -33,11 +37,15 @@ return new class extends Migration
         }
 
         // sort tasks by depth ascending so parents are processed before children
-        uasort($depths, function ($a, $b) { return $a <=> $b; });
+        uasort($depths, function ($a, $b) {
+            return $a <=> $b;
+        });
 
         foreach ($depths as $taskId => $d) {
             $parentId = $byId[$taskId] ?? null;
-            if (! $parentId) continue;
+            if (! $parentId) {
+                continue;
+            }
 
             // get all ancestors of parent (should exist at least as self entries)
             $parentAncestors = DB::table('task_closure')->where('descendant_id', $parentId)->get();
