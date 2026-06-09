@@ -1,12 +1,14 @@
 import { openConfirmModal } from "@/components/ConfirmModal";
 import { ActionIcon, Group, Menu, rem } from "@mantine/core";
-import { IconArchive, IconArchiveOff, IconDots, IconCurrencyDollar } from "@tabler/icons-react";
+import { IconArchive, IconArchiveOff, IconDots } from "@tabler/icons-react";
 import { useState } from 'react';
+import { usePage } from "@inertiajs/react";
 import TaskCostsModal from '@/components/TaskCostsModal';
 import { useForm } from "laravel-precognition-react-inertia";
 
 export default function TaskActions({ task, ...props }) {
   const [costsOpened, setCostsOpened] = useState(false);
+  const { currency } = usePage().props;
   const archiveForm = useForm(
     "delete",
     route("projects.tasks.destroy", [task.project_id, task.id]),
@@ -35,8 +37,12 @@ export default function TaskActions({ task, ...props }) {
 
   return (
     <Group gap={0} justify="flex-end" {...props}>
-      <ActionIcon title="Costs" variant="subtle" onClick={() => setCostsOpened(true)}>
-        <IconCurrencyDollar style={{ width: rem(20), height: rem(20) }} stroke={1.5} />
+      <ActionIcon
+        title={`Costs (${currency?.symbol ?? ''})`}
+        variant="subtle"
+        onClick={() => setCostsOpened(true)}
+      >
+        <span style={{ fontSize: rem(14) }}>{currency?.symbol ?? '$'}</span>
       </ActionIcon>
       <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
       {((can("archive task") && !route().params.archived) ||

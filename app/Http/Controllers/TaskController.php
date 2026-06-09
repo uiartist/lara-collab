@@ -59,7 +59,9 @@ class TaskController extends Controller
             'labels' => Label::get(['id', 'name', 'color']),
             'taskGroups' => $groups,
             'groupedTasks' => $groupedTasks,
-            'openedTask' => $task ? $task->loadDefault() : null,
+            'openedTask' => $task ? $task->load(array_merge($task->defaultWith, ['descendants']))->load(['descendants' => function ($q) use ($task) {
+                $q->with($task->defaultWith);
+            }]) : null,
             'currency' => [
                 'symbol' => OwnerCompany::with('currency')->first()->currency->symbol,
             ],
@@ -116,6 +118,79 @@ class TaskController extends Controller
         );
 
         return response()->json();
+    }
+
+    public function descendants(Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('viewAny', [Task::class, $project]);
+
+        // exclude the self-row (depth 0) so only actual children/descendants are returned
+        $descendants = $task->descendants()
+            ->wherePivot('depth', '>', 0)
+            ->with($task->defaultWith)
+            ->get();
+
+        return response()->json(['descendants' => $descendants]);
+    }
+
+    public function hierarchyCosts(Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('viewAny', [Task::class, $project]);
+
+        $costsWith = ['taskCosts' => fn ($q) => $q->with('user:id,name')->orderBy('date', 'desc')];
+
+        $descendants = $task->descendants()
+            ->wherePivot('depth', '>', 0)
+            ->with($costsWith)
+            ->get();
+
+        $task->load($costsWith);
+
+        $toNode = fn ($t) => [
+            'id'               => $t->id,
+            'parent_id'        => $t->parent_id,
+            'name'             => $t->name,
+            'number'           => $t->number,
+            'depth'            => $t->depth,
+            'estimated_budget' => $t->estimated_budget,
+            'costs_total'      => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
+            'costs'            => $t->taskCosts->map(fn ($c) => [
+                'id'     => $c->id,
+                'amount' => (float) $c->amount,
+                'date'   => $c->date,
+                'user'   => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
+            ])->values(),
+        ];
+
+        return response()->json([
+            'nodes' => collect([$task])->concat($descendants)->map($toNode)->values(),
+        ]);
+    }
+
+    public function updateBudget(Request $request, Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('update', [$task, $project]);
+
+        $data = $request->validate([
+            'estimated_budget' => ['nullable', 'numeric', 'min:0'],
+            'actual_budget'    => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $update = [];
+        foreach (['estimated_budget', 'actual_budget'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $update[$field] = $data[$field] !== null
+                    ? (int) round($data[$field] * 100)
+                    : null;
+            }
+        }
+
+        $task->update($update);
+
+        return response()->json([
+            'estimated_budget' => $task->estimated_budget,
+            'actual_budget'    => $task->actual_budget,
+        ]);
     }
 
     public function complete(Request $request, Project $project, Task $task): JsonResponse

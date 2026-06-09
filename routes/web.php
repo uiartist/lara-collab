@@ -23,6 +23,7 @@ use App\Http\Controllers\Task\CommentController;
 use App\Http\Controllers\Task\GroupController;
 use App\Http\Controllers\Task\TimeLogController;
 use App\Http\Controllers\Task\TaskCostController;
+use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -53,7 +54,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('{project}/tasks', [TaskController::class, 'index'])->name('tasks');
         Route::post('{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');
         Route::put('{project}/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update')->scopeBindings();
+        Route::patch('{project}/tasks/{task}/budget', [TaskController::class, 'updateBudget'])->name('tasks.budget.update')->scopeBindings();
+        Route::get('{project}/tasks/{task}/hierarchy-costs', [TaskController::class, 'hierarchyCosts'])->name('tasks.hierarchy-costs')->scopeBindings();
         Route::get('{project}/tasks/{task}/open', [TaskController::class, 'index'])->name('tasks.open')->scopeBindings();
+        Route::get('{project}/tasks/{task}/descendants', [TaskController::class, 'descendants'])->name('tasks.descendants')->scopeBindings();
+
+        // SUB-TASKS (direct children of a task)
+        Route::get('{project}/tasks/{task}/sub-tasks', [SubTaskController::class, 'index'])->name('tasks.sub-tasks.index')->scopeBindings();
+        Route::post('{project}/tasks/{task}/sub-tasks', [SubTaskController::class, 'store'])->name('tasks.sub-tasks.store')->scopeBindings();
+        Route::put('{project}/tasks/{task}/sub-tasks/{subTask}', [SubTaskController::class, 'update'])->name('tasks.sub-tasks.update')->scopeBindings();
+        Route::delete('{project}/tasks/{task}/sub-tasks/{subTask}', [SubTaskController::class, 'destroy'])->name('tasks.sub-tasks.destroy')->scopeBindings();
         Route::delete('{project}/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy')->scopeBindings();
         Route::post('{project}/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore')->scopeBindings();
 

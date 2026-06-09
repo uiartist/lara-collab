@@ -11,6 +11,7 @@ use App\Models\Filters\WhereInFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -43,8 +44,13 @@ class Task extends Model implements AuditableContract, Sortable
         'hidden_from_clients',
         'billable',
         'order_column',
+        'parent_id',
+        'item_type',
+        'depth',
         'assigned_at',
         'completed_at',
+        'estimated_budget',
+        'actual_budget',
     ];
 
     protected $searchable = [
@@ -60,11 +66,15 @@ class Task extends Model implements AuditableContract, Sortable
         'estimation' => 'float',
         'fixed_price' => 'integer',
         'pricing_type' => PricingType::class,
+        'estimated_budget' => 'integer',
+        'actual_budget' => 'integer',
     ];
 
     protected $appends = [
         'price',
     ];
+
+    protected $with = [];
 
     protected $observables = [
         'archived',
@@ -98,6 +108,93 @@ class Task extends Model implements AuditableContract, Sortable
         static::addGlobalScope('ordered', function ($query) {
             $query->ordered();
         });
+
+        static::created(function (Task $task) {
+            // insert self in closure
+            DB::table('task_closure')->insert([
+                'ancestor_id' => $task->id,
+                'descendant_id' => $task->id,
+                'depth' => 0,
+            ]);
+
+            if ($task->parent_id) {
+                $ancestors = DB::table('task_closure')
+                    ->where('descendant_id', $task->parent_id)
+                    ->get();
+
+                $inserts = [];
+                foreach ($ancestors as $a) {
+                    $inserts[] = [
+                        'ancestor_id' => $a->ancestor_id,
+                        'descendant_id' => $task->id,
+                        'depth' => $a->depth + 1,
+                    ];
+                }
+
+                if (! empty($inserts)) {
+                    DB::table('task_closure')->insert($inserts);
+                }
+            }
+        });
+        static::updating(function (Task $task) {
+            if (! $task->isDirty('parent_id')) {
+                return;
+            }
+
+            $originalParent = $task->getOriginal('parent_id');
+            $newParent = $task->parent_id;
+
+            // get descendants of the task (including self) and their depth relative to the task
+            $depths = DB::table('task_closure')
+                ->where('ancestor_id', $task->id)
+                ->pluck('depth', 'descendant_id')
+                ->toArray();
+
+            $descendantIds = array_keys($depths);
+
+            if (empty($descendantIds)) {
+                return;
+            }
+
+            // remove closure rows for descendants (we will rebuild them)
+            DB::table('task_closure')->whereIn('descendant_id', $descendantIds)->delete();
+
+            $inserts = [];
+
+            // re-insert self links for all descendants
+            foreach ($descendantIds as $d) {
+                $inserts[] = [
+                    'ancestor_id' => $d,
+                    'descendant_id' => $d,
+                    'depth' => 0,
+                ];
+            }
+
+            // if new parent exists, get its ancestors to link into subtree
+            if ($newParent) {
+                $parentAncestors = DB::table('task_closure')
+                    ->where('descendant_id', $newParent)
+                    ->get();
+
+                foreach ($parentAncestors as $pa) {
+                    foreach ($descendantIds as $d) {
+                        $inserts[] = [
+                            'ancestor_id' => $pa->ancestor_id,
+                            'descendant_id' => $d,
+                            'depth' => $pa->depth + 1 + $depths[$d],
+                        ];
+                    }
+                }
+            }
+
+            if (! empty($inserts)) {
+                // bulk insert (chunk to avoid very large queries)
+                $chunks = array_chunk($inserts, 500);
+                foreach ($chunks as $chunk) {
+                    DB::table('task_closure')->insert($chunk);
+                }
+            }
+        });
     }
 
     public function scopeWithDefault(Builder $query)
@@ -113,6 +210,31 @@ class Task extends Model implements AuditableContract, Sortable
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Task::class, 'parent_id');
+    }
+
+    public function subTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'parent_id');
+    }
+
+    public function ancestors()
+    {
+        return $this->belongsToMany(Task::class, 'task_closure', 'descendant_id', 'ancestor_id')->withPivot('depth');
+    }
+
+    public function descendants()
+    {
+        return $this->belongsToMany(Task::class, 'task_closure', 'ancestor_id', 'descendant_id')->withPivot('depth');
     }
 
     public function taskGroup(): BelongsTo
@@ -153,6 +275,11 @@ class Task extends Model implements AuditableContract, Sortable
     public function timeLogs(): HasMany
     {
         return $this->hasMany(TimeLog::class);
+    }
+
+    public function taskCosts(): HasMany
+    {
+        return $this->hasMany(TaskCost::class);
     }
 
     public function comments(): HasMany

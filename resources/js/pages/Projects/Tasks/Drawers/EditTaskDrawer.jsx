@@ -21,8 +21,9 @@ import {
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import TaskCostsModal from '@/components/TaskCostsModal';
+import HierarchyCostsModal from '@/components/HierarchyCostsModal';
 import Comments from './Comments';
+import HierarchyPanel from './HierarchyPanel';
 import LabelsDropdown from './LabelsDropdown';
 import Timer from './Timer';
 import classes from './css/TaskDrawer.module.css';
@@ -65,6 +66,7 @@ export function EditTaskDrawer() {
     subscribed_users: [],
     labels: [],
   });
+  
 
   useEffect(() => {
     if (edit.opened) {
@@ -194,9 +196,12 @@ export function EditTaskDrawer() {
             <button type="button" className="btn btn-info me-4">Inventory</button>
             <button type="button" className="btn btn-info me-4">Reports</button>
             </div>
-            <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
+            <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
             <button type="button" className="btn btn-success">Save</button>
           </div>
+
+          <HierarchyPanel task={task} />
+
           <form className={classes.inner}>
             <div className={classes.content}>
               <TextInput

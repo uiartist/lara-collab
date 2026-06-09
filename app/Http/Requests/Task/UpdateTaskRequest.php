@@ -37,6 +37,8 @@ class UpdateTaskRequest extends FormRequest
             'billable' => ['boolean'],
             'subscribed_users' => ['array'],
             'labels' => ['array'],
+            'estimated_budget' => ['nullable', 'numeric', 'min:0'],
+            'actual_budget' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

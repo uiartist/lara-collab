@@ -14,12 +14,12 @@ import {
   IconLayoutList,
   IconPlus,
 } from "@tabler/icons-react";
-import { IconCurrencyDollar } from "@tabler/icons-react";
+// IconCurrencyDollar removed — button will show currency in label instead
 import { useState } from 'react';
 import TaskCostsModal from '@/components/TaskCostsModal';
 
 export default function Header() {
-  const { project } = usePage().props;
+  const { project, currency } = usePage().props;
 
   const { tasksView, setTasksView } = usePreferences();
   const { openDrawer } = useTaskFiltersStore();
@@ -94,9 +94,13 @@ export default function Header() {
               Add task
             </Button>
           )}
-          <ActionIcon title="Project Costs" onClick={() => setCostsOpened(true)}>
-            <IconCurrencyDollar />
-          </ActionIcon>
+          <Button
+            title={`Estimated Costs (${currency?.symbol ?? ""})`}
+            onClick={() => setCostsOpened(true)}
+            radius="xl"
+          >
+            {`Estimated Costs (${currency?.symbol ?? ""})`}
+          </Button>
           <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={project.id} task={null} />
         </Group>
       </Grid.Col>
