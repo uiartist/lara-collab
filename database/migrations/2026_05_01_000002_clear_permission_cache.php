@@ -10,7 +10,7 @@ return new class extends Migration
         // Clear spatie permission cache so newly inserted permissions become available immediately
         try {
             app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // ignore
         }
     }
