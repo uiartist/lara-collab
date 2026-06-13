@@ -15,11 +15,13 @@ use App\Models\Label;
 use App\Models\OwnerCompany;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskCost;
 use App\Models\TaskGroup;
 use App\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -132,9 +134,9 @@ class TaskController extends Controller
 
         // Append costs_total and normalize date fields to date strings on each descendant
         $descendants->each(function ($t) {
-            $t->costs_total     = (float) $t->taskCosts->sum('amount');
-            $t->estimated_date  = $t->estimated_date?->toDateString();
-            $t->actual_date     = $t->actual_date?->toDateString();
+            $t->costs_total = (float) $t->taskCosts->sum('amount');
+            $t->estimated_date = $t->estimated_date?->toDateString();
+            $t->actual_date = $t->actual_date?->toDateString();
         });
 
         // Also load costs for root task
@@ -142,10 +144,10 @@ class TaskController extends Controller
         $task->costs_total = (float) $task->taskCosts->sum('amount');
 
         return response()->json([
-            'descendants'          => $descendants,
-            'root_costs_total'     => $task->costs_total,
-            'root_estimated_date'  => $task->estimated_date?->toDateString(),
-            'root_actual_date'     => $task->actual_date?->toDateString(),
+            'descendants' => $descendants,
+            'root_costs_total' => $task->costs_total,
+            'root_estimated_date' => $task->estimated_date?->toDateString(),
+            'root_actual_date' => $task->actual_date?->toDateString(),
         ]);
     }
 
@@ -159,12 +161,12 @@ class TaskController extends Controller
             ->get(['id', 'number', 'name', 'depth', 'estimated_date', 'actual_date']);
 
         $tasks = $rootTasks->map(fn ($t) => [
-            'id'             => $t->id,
-            'number'         => $t->number,
-            'name'           => $t->name,
-            'depth'          => $t->depth,
+            'id' => $t->id,
+            'number' => $t->number,
+            'name' => $t->name,
+            'depth' => $t->depth,
             'estimated_date' => $t->estimated_date?->toDateString(),
-            'actual_date'    => $t->actual_date?->toDateString(),
+            'actual_date' => $t->actual_date?->toDateString(),
         ]);
 
         return response()->json(['tasks' => $tasks]);
@@ -180,18 +182,18 @@ class TaskController extends Controller
             ->get(['id', 'number', 'name', 'estimated_budget']);
 
         $tasks = $rootTasks->map(function ($rootTask) {
-            $allIds = \Illuminate\Support\Facades\DB::table('task_closure')
+            $allIds = DB::table('task_closure')
                 ->where('ancestor_id', $rootTask->id)
                 ->pluck('descendant_id');
 
-            $costsTotal = \App\Models\TaskCost::whereIn('task_id', $allIds)->sum('amount');
+            $costsTotal = TaskCost::whereIn('task_id', $allIds)->sum('amount');
 
             return [
-                'id'               => $rootTask->id,
-                'number'           => $rootTask->number,
-                'name'             => $rootTask->name,
+                'id' => $rootTask->id,
+                'number' => $rootTask->number,
+                'name' => $rootTask->name,
                 'estimated_budget' => $rootTask->estimated_budget, // cents
-                'costs_total'      => (float) $costsTotal,         // dollars
+                'costs_total' => (float) $costsTotal,         // dollars
             ];
         });
 
@@ -218,13 +220,13 @@ class TaskController extends Controller
             'number' => $t->number,
             'depth' => $t->depth,
             'estimated_budget' => $t->estimated_budget,
-            'actual_budget'    => $t->actual_budget,
-            'costs_total'      => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
-            'costs'            => $t->taskCosts->map(fn ($c) => [
-                'id'     => $c->id,
+            'actual_budget' => $t->actual_budget,
+            'costs_total' => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
+            'costs' => $t->taskCosts->map(fn ($c) => [
+                'id' => $c->id,
                 'amount' => (float) $c->amount,
-                'date'   => $c->date,
-                'user'   => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
+                'date' => $c->date,
+                'user' => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
             ])->values(),
         ];
 
@@ -239,9 +241,9 @@ class TaskController extends Controller
 
         $data = $request->validate([
             'estimated_budget' => ['nullable', 'numeric', 'min:0'],
-            'actual_budget'    => ['nullable', 'numeric', 'min:0'],
-            'estimated_date'   => ['nullable', 'date'],
-            'actual_date'      => ['nullable', 'date'],
+            'actual_budget' => ['nullable', 'numeric', 'min:0'],
+            'estimated_date' => ['nullable', 'date'],
+            'actual_date' => ['nullable', 'date'],
         ]);
 
         $update = [];
@@ -262,9 +264,9 @@ class TaskController extends Controller
 
         return response()->json([
             'estimated_budget' => $task->estimated_budget,
-            'actual_budget'    => $task->actual_budget,
-            'estimated_date'   => $task->estimated_date?->toDateString(),
-            'actual_date'      => $task->actual_date?->toDateString(),
+            'actual_budget' => $task->actual_budget,
+            'estimated_date' => $task->estimated_date?->toDateString(),
+            'actual_date' => $task->actual_date?->toDateString(),
         ]);
     }
 
