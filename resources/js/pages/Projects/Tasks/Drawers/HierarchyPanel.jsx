@@ -24,12 +24,21 @@ const fmt = cents => {
   return (cents / 100).toFixed(2);
 };
 
+// Normalize any date value to YYYY-MM-DD string (for <input type="date">)
+const toDateInput = val => {
+  if (!val) return '';
+  if (typeof val === 'string' && val.length === 10) return val; // already YYYY-MM-DD
+  return val.slice(0, 10); // trim ISO datetime to date part
+};
+
 // Shared column width constants
 const COL = {
-  estimated: 120,
-  actual: 120,
-  profit: 150,
-  actions: 100,
+  estimated: 110,
+  actual: 100,
+  profit: 110,
+  estDate: 125,
+  actDate: 125,
+  actions: 70,
 };
 
 // ─── Column header row ────────────────────────────────────────────────────────
@@ -51,18 +60,28 @@ function HeaderRow() {
         </Text>
       </div>
       <div style={{ width: COL.estimated }}>
-        <Text size='xs' fw={700} c='dimmed'>
+        <Text size='xs' fw={700} c='dimmed' ta='right'>
           Estimated
         </Text>
       </div>
       <div style={{ width: COL.actual }}>
-        <Text size='xs' fw={700} c='dimmed'>
+        <Text size='xs' fw={700} c='dimmed' ta='right' pr={4}>
           Actual
         </Text>
       </div>
       <div style={{ width: COL.profit }}>
-        <Text size='xs' fw={700} c='dimmed'>
+        <Text size='xs' fw={700} c='dimmed' ta='right'>
           Profit / Loss
+        </Text>
+      </div>
+      <div style={{ width: COL.estDate }}>
+        <Text size='xs' fw={700} c='dimmed' ta='center'>
+          Est. Date
+        </Text>
+      </div>
+      <div style={{ width: COL.actDate }}>
+        <Text size='xs' fw={700} c='dimmed' ta='center'>
+          Actual Date
         </Text>
       </div>
       <div style={{ width: COL.actions }} />
@@ -73,24 +92,23 @@ function HeaderRow() {
 // ─── Single node row (displays budget inputs and actions) ─────────────────────
 function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, childrenTotalActual, hasChildren }) {
   const estimatedRef = useRef((node.estimated_budget || 0) / 100);
-  const actualRef = useRef((node.actual_budget || 0) / 100);
   const [estimated, setEstimated] = useState((node.estimated_budget || 0) / 100);
-  const [actual, setActual] = useState((node.actual_budget || 0) / 100);
+  const [estDate, setEstDate] = useState(toDateInput(node.estimated_date));
+  const [actDate, setActDate] = useState(toDateInput(node.actual_date));
 
   // Re-sync local state when node prop updates (e.g. after save)
   useEffect(() => {
     const e = (node.estimated_budget || 0) / 100;
-    const a = (node.actual_budget || 0) / 100;
     estimatedRef.current = e;
-    actualRef.current = a;
     setEstimated(e);
-    setActual(a);
-  }, [node.estimated_budget, node.actual_budget]);
+    setEstDate(toDateInput(node.estimated_date));
+    setActDate(toDateInput(node.actual_date));
+  }, [node.estimated_budget, node.estimated_date, node.actual_date]);
 
-  // When the node has children, its "actual" is the sum of children's actual budgets.
-  // When it's a leaf, compare against its own actual_budget.
-  const effectiveActual = hasChildren ? childrenTotalActual : (node.actual_budget || 0);
-  const profit = (node.estimated_budget || 0) - effectiveActual;
+  // Actual = cumulative logged costs from children (for parents) or self (for leaves)
+  const effectiveActual = hasChildren ? childrenTotalActual : (node.costs_total || 0);
+  const effectiveActualCents = effectiveActual * 100;
+  const profit = (node.estimated_budget || 0) - effectiveActualCents;
   const isProfit = profit >= 0;
 
   return (
@@ -106,7 +124,7 @@ function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, chil
       }}
     >
       {/* Name */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
         <Group gap={6} wrap='nowrap'>
           <Badge size='xs' variant='light' color={depth === 0 ? 'blue' : 'gray'} style={{ flexShrink: 0 }}>
             {getLevelLabel(node.depth ?? depth)}
@@ -134,30 +152,40 @@ function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, chil
         />
       </div>
 
-      {/* Actual Budget */}
+      {/* Actual — always read-only, sourced from logged costs (costs_total) */}
       <div style={{ width: COL.actual }}>
-        <NumberInput
-          size='xs'
-          value={actual}
-          min={0}
-          decimalScale={2}
-          fixedDecimalScale
-          allowNegative={false}
-          onChange={v => {
-            actualRef.current = v;
-            setActual(v);
-          }}
-          onBlur={() => onBudgetSave(node.id, 'actual_budget', actualRef.current)}
+        <Text size='sm' fw={600} ta='right' pr={4}>
+          {effectiveActual.toFixed(2)}
+        </Text>
+      </div>
+
+      {/* Profit / Loss */}
+      <div style={{ width: COL.profit }}>
+        <Text size='sm' fw={600} c={isProfit ? 'green' : 'red'} ta='right' pr={4}>
+          {isProfit ? '+' : '-'}{fmt(Math.abs(profit))}
+        </Text>
+      </div>
+
+      {/* Estimated Date */}
+      <div style={{ width: COL.estDate }}>
+        <input
+          type='date'
+          value={estDate}
+          onChange={e => setEstDate(e.target.value)}
+          onBlur={() => onBudgetSave(node.id, 'estimated_date', estDate || null)}
+          style={{ width: '100%', fontSize: 12, padding: '2px 4px', border: '1px solid var(--mantine-color-gray-4)', borderRadius: 4 }}
         />
       </div>
 
-      {/* Profit / Loss — only shown when node has children */}
-      <div style={{ width: COL.profit }}>
-        {hasChildren && (
-          <Text size='sm' fw={600} c={isProfit ? 'green' : 'red'}>
-            {isProfit ? 'Profit' : 'Loss'}: {fmt(Math.abs(profit))}
-          </Text>
-        )}
+      {/* Actual Date */}
+      <div style={{ width: COL.actDate }}>
+        <input
+          type='date'
+          value={actDate}
+          onChange={e => setActDate(e.target.value)}
+          onBlur={() => onBudgetSave(node.id, 'actual_date', actDate || null)}
+          style={{ width: '100%', fontSize: 12, padding: '2px 4px', border: '1px solid var(--mantine-color-gray-4)', borderRadius: 4 }}
+        />
       </div>
 
       {/* Actions */}
@@ -210,20 +238,22 @@ function SummaryRow({ depth, parentEstimated, totalActual }) {
         </Text>
       </div>
       <div style={{ width: COL.estimated }}>
-        <Text size='xs' fw={600}>
+        <Text size='xs' fw={600} ta='right'>
           {fmt(parentEstimated)}
         </Text>
       </div>
       <div style={{ width: COL.actual }}>
-        <Text size='xs' fw={600}>
+        <Text size='xs' fw={600} ta='right' pr={4}>
           {fmt(totalActual)}
         </Text>
       </div>
       <div style={{ width: COL.profit }}>
-        <Text size='xs' fw={700} c={isProfit ? 'green' : 'red'}>
-          {isProfit ? 'Profit' : 'Loss'}: {fmt(Math.abs(profit))}
+        <Text size='xs' fw={700} c={isProfit ? 'green' : 'red'} ta='right' pr={4}>
+          {isProfit ? '+' : '-'}{fmt(Math.abs(profit))}
         </Text>
       </div>
+      <div style={{ width: COL.estDate }} />
+      <div style={{ width: COL.actDate }} />
       <div style={{ width: COL.actions }} />
     </div>
   );
@@ -264,18 +294,10 @@ function AddChildRow({ depth, labelDepth, form, setForm, onSave, onCancel, savin
           onChange={v => setForm(f => ({ ...f, estimated_budget: v }))}
         />
       </div>
-      <div style={{ width: COL.actual }}>
-        <NumberInput
-          size='xs'
-          placeholder='Actual'
-          value={form.actual_budget}
-          min={0}
-          decimalScale={2}
-          allowNegative={false}
-          onChange={v => setForm(f => ({ ...f, actual_budget: v }))}
-        />
-      </div>
+      <div style={{ width: COL.actual }} />
       <div style={{ width: COL.profit }} />
+      <div style={{ width: COL.estDate }} />
+      <div style={{ width: COL.actDate }} />
       <div style={{ width: COL.actions }}>
         <Group gap={4}>
           <ActionIcon size='sm' color='green' variant='filled' loading={saving} onClick={onSave}>
@@ -290,15 +312,14 @@ function AddChildRow({ depth, labelDepth, form, setForm, onSave, onCancel, savin
   );
 }
 
-// Returns the effective actual cost for a node:
-// - leaf node → its own actual_budget
-// - parent node → recursive sum of all descendants' leaf actuals
-function getEffectiveActual(nodeId, allNodes) {
+// Cumulative logged costs (costs_total) for a node's subtree:
+// leaf nodes contribute their own costs_total; parents sum their children.
+function cumulativeLoggedCosts(nodeId, allNodes) {
   const node = allNodes.find(n => n.id === nodeId);
   if (!node) return 0;
   const children = allNodes.filter(n => n.parent_id === nodeId);
-  if (children.length === 0) return node.actual_budget || 0;
-  return children.reduce((s, c) => s + getEffectiveActual(c.id, allNodes), 0);
+  if (children.length === 0) return node.costs_total || 0;
+  return children.reduce((s, c) => s + cumulativeLoggedCosts(c.id, allNodes), 0);
 }
 
 // ─── Recursive node renderer ──────────────────────────────────────────────────
@@ -318,8 +339,8 @@ function NodeWithChildren({
 }) {
   const children = allNodes.filter(n => n.parent_id === node.id);
   const childTotalEst = children.reduce((s, c) => s + (c.estimated_budget || 0), 0);
-  // Use recursive effective actual so costs from deep descendants bubble up
-  const childTotalAct = children.reduce((s, c) => s + getEffectiveActual(c.id, allNodes), 0);
+  // Use cumulative logged costs so costs from deep descendants bubble up
+  const childTotalAct = children.reduce((s, c) => s + cumulativeLoggedCosts(c.id, allNodes), 0);
 
   return (
     <>
@@ -371,7 +392,7 @@ function NodeWithChildren({
         <SummaryRow
           depth={depth + 1}
           parentEstimated={node.estimated_budget || 0}
-          totalActual={childTotalAct}
+          totalActual={childTotalAct * 100}
         />
       )}
     </>
@@ -379,13 +400,15 @@ function NodeWithChildren({
 }
 
 // ─── Main HierarchyPanel component ───────────────────────────────────────────
-export default function HierarchyPanel({ task }) {
+export default function HierarchyPanel({ task, costsVersion, drawerOpened }) {
   const { updateTaskProperty } = useTasksStore();
 
-  const [descendants, setDescendants] = useState([]); // flat list, excludes root
+  const [descendants, setDescendants] = useState([]);
+  const [rootCostsTotal, setRootCostsTotal] = useState(0);
+  const [rootDates, setRootDates] = useState({ estimated_date: null, actual_date: null });
   const [loading, setLoading] = useState(false);
   const [addingChildOf, setAddingChildOf] = useState(null); // parent node id
-  const [addForm, setAddForm] = useState({ name: '', estimated_budget: '', actual_budget: '' });
+  const [addForm, setAddForm] = useState({ name: '', estimated_budget: '' });
   const [saving, setSaving] = useState(false);
 
   const fetchDescendants = () => {
@@ -393,31 +416,43 @@ export default function HierarchyPanel({ task }) {
     setLoading(true);
     axios
       .get(route('projects.tasks.descendants', [task.project_id, task.id]))
-      .then(res => setDescendants(res.data.descendants || []))
+      .then(res => {
+        setDescendants(res.data.descendants || []);
+        setRootCostsTotal(res.data.root_costs_total ?? 0);
+        setRootDates({
+          estimated_date: res.data.root_estimated_date ?? null,
+          actual_date: res.data.root_actual_date ?? null,
+        });
+      })
       .catch(() => setDescendants([]))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchDescendants();
-  }, [task?.id]);
+    if (drawerOpened) fetchDescendants();
+  }, [task?.id, costsVersion, drawerOpened]);
 
-  // All nodes visible in the tree: root + descendants
-  const allNodes = [task, ...descendants];
+  // All nodes visible in the tree: root (with costs_total + persisted dates injected) + descendants
+  const allNodes = [{ ...task, costs_total: rootCostsTotal, ...rootDates }, ...descendants];
 
   const onBudgetSave = (nodeId, field, value) => {
-    const cents = Math.round((value || 0) * 100);
+    const isDateField = field === 'estimated_date' || field === 'actual_date';
+    const storedValue = isDateField ? (value || null) : Math.round((value || 0) * 100);
     axios
       .patch(route('projects.tasks.budget.update', [task.project_id, nodeId]), {
-        [field]: value, // backend multiplies by 100
+        [field]: value, // backend handles conversion for budget; dates passed as-is
       })
       .then(() => {
         if (nodeId === task.id) {
-          // Sync root task budget back to the global tasks store
-          updateTaskProperty(task, field, cents);
+          // For budget fields sync to store; date fields update local root state
+          if (isDateField) {
+            setRootDates(prev => ({ ...prev, [field]: storedValue }));
+          } else {
+            updateTaskProperty(task, field, storedValue);
+          }
         } else {
           setDescendants(prev =>
-            prev.map(n => (n.id === nodeId ? { ...n, [field]: cents } : n)),
+            prev.map(n => (n.id === nodeId ? { ...n, [field]: storedValue } : n)),
           );
         }
       })
@@ -431,14 +466,13 @@ export default function HierarchyPanel({ task }) {
       .post(route('projects.tasks.sub-tasks.store', [task.project_id, addingChildOf]), {
         name: addForm.name,
         estimated_budget: addForm.estimated_budget || null,
-        actual_budget: addForm.actual_budget || null,
         pricing_type: 'hourly',
         hidden_from_clients: false,
         billable: true,
       })
       .then(res => {
         setDescendants(prev => [...prev, res.data.sub_task]);
-        setAddForm({ name: '', estimated_budget: '', actual_budget: '' });
+        setAddForm({ name: '', estimated_budget: '' });
         setAddingChildOf(null);
       })
       .catch(err => console.error('Add child failed', err))
@@ -488,7 +522,7 @@ export default function HierarchyPanel({ task }) {
         style={{
           border: '1px solid var(--mantine-color-gray-3)',
           borderRadius: 4,
-          overflow: 'hidden',
+          overflow: 'auto',
         }}
       >
         <HeaderRow />

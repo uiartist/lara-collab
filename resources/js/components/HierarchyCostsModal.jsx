@@ -18,7 +18,7 @@ import { showNotification } from '@mantine/notifications';
 import { IconChevronDown, IconChevronRight, IconPlus, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 
 const LEVEL_LABELS = ['Task', 'Sub Task', 'Assignment', 'Work List', 'Sub Work List'];
 const getLevelLabel = depth => LEVEL_LABELS[depth] ?? `Level ${depth + 1}`;
@@ -34,13 +34,19 @@ const fmtCents = cents => {
   return (cents / 100).toFixed(2);
 };
 
-/** Sum costs_total recursively for a node and all its descendants */
-function cumulativeCosts(nodeId, allNodes) {
+/** Recursively sum costs_total (logged TaskCost entries) across the subtree.
+ *  Leaf nodes contribute their own costs_total; parents sum their children. */
+function cumulativeLoggedCosts(nodeId, allNodes) {
   const node = allNodes.find(n => n.id === nodeId);
   if (!node) return 0;
   const children = allNodes.filter(n => n.parent_id === nodeId);
   if (children.length === 0) return node.costs_total;
-  return children.reduce((s, c) => s + cumulativeCosts(c.id, allNodes), 0);
+  return children.reduce((s, c) => s + cumulativeLoggedCosts(c.id, allNodes), 0);
+}
+
+/** Format a plain number (dollars) to 2-decimal display string */
+function fmtActual(value) {
+  return Number(value).toFixed(2);
 }
 
 function NodeRow({ node, allNodes, expanded, onToggle, onAddCost, onDeleteCost }) {
@@ -53,14 +59,14 @@ function NodeRow({ node, allNodes, expanded, onToggle, onAddCost, onDeleteCost }
   const children = allNodes.filter(n => n.parent_id === node.id);
   const hasChildren = children.length > 0;
 
-  // Effective actual for profit: for parents = sum of children's cumulative costs
-  const effectiveActual = hasChildren
-    ? children.reduce((s, c) => s + cumulativeCosts(c.id, allNodes), 0)
-    : node.costs_total;
+  // Actual = cumulative logged costs across this node's subtree
+  const effectiveActual = cumulativeLoggedCosts(node.id, allNodes);
 
-  const profitCents = (node.estimated_budget || 0) - effectiveActual * 100;
-  const profitLabel = profitCents >= 0 ? `Profit: ${(profitCents / 100).toFixed(2)}` : `Loss: ${(Math.abs(profitCents) / 100).toFixed(2)}`;
-  const profitColor = profitCents >= 0 ? 'teal' : 'red';
+  // Profit: estimated_budget (cents) vs logged costs (dollars) → normalise to dollars
+  const estimatedDollars = (node.estimated_budget || 0) / 100;
+  const profit = estimatedDollars - effectiveActual;
+  const profitLabel = profit >= 0 ? `+${profit.toFixed(2)}` : `-${Math.abs(profit).toFixed(2)}`;
+  const profitColor = profit >= 0 ? 'teal' : 'red';
 
   const indent = (node.depth ?? 0) * 20;
 
@@ -119,22 +125,33 @@ function NodeRow({ node, allNodes, expanded, onToggle, onAddCost, onDeleteCost }
         </td>
         <td>
           <Text size="sm" ta="right">
-            {node.costs_total.toFixed(2)}
+            {fmtActual(effectiveActual)}
           </Text>
         </td>
         <td>
-          {hasChildren && (
-            <Text size="sm" ta="right" c={profitColor} fw={500}>
-              {profitLabel}
-            </Text>
+          <Text size="sm" ta="right" c={profitColor} fw={500}>
+            {profitLabel}
+          </Text>
+        </td>
+        <td>
+          {!hasChildren && (
+            <ActionIcon
+              size="xs"
+              variant="light"
+              color="blue"
+              title="Add cost"
+              onClick={e => { e.stopPropagation(); if (!expanded) onToggle(); }}
+            >
+              <IconPlus size={12} />
+            </ActionIcon>
           )}
         </td>
       </tr>
 
       {/* Expanded: cost entries + add form */}
       {expanded && (
-        <tr>
-          <td colSpan={4} style={{ backgroundColor: 'var(--mantine-color-gray-0)', padding: '8px 12px 8px ' + (indent + 40) + 'px' }}>
+        <tr onClick={e => e.stopPropagation()}>
+          <td colSpan={5} style={{ backgroundColor: 'var(--mantine-color-gray-0)', padding: '8px 12px 8px ' + (indent + 40) + 'px' }}>
             {/* Existing cost entries */}
             {node.costs.length > 0 && (
               <Table withColumnBorders striped mb="xs" fz="xs">
@@ -169,37 +186,39 @@ function NodeRow({ node, allNodes, expanded, onToggle, onAddCost, onDeleteCost }
               </Table>
             )}
 
-            {/* Add cost form */}
-            <Group gap="xs" align="flex-end" onClick={e => e.stopPropagation()}>
-              <TextInput
-                label="Date"
-                type="date"
-                size="xs"
-                value={addDate}
-                onChange={e => setAddDate(e.target.value)}
-                style={{ width: 140 }}
-              />
-              <NumberInput
-                label="Amount"
-                size="xs"
-                decimalScale={2}
-                min={0.01}
-                step={0.01}
-                value={addAmount ?? ''}
-                onChange={val => setAddAmount(val || null)}
-                error={addError}
-                style={{ width: 110 }}
-              />
-              <Button
-                size="xs"
-                leftSection={<IconPlus size={12} />}
-                loading={saving}
-                disabled={saving}
-                onClick={handleAdd}
-              >
-                Add
-              </Button>
-            </Group>
+            {/* Add cost form — only for leaf nodes */}
+            {!hasChildren && (
+              <Group gap="xs" align="flex-end" onClick={e => e.stopPropagation()}>
+                <TextInput
+                  label="Date"
+                  type="date"
+                  size="xs"
+                  value={addDate}
+                  onChange={e => setAddDate(e.target.value)}
+                  style={{ width: 140 }}
+                />
+                <NumberInput
+                  label="Amount"
+                  size="xs"
+                  decimalScale={2}
+                  min={0.01}
+                  step={0.01}
+                  value={addAmount ?? ''}
+                  onChange={val => setAddAmount(val || null)}
+                  error={addError}
+                  style={{ width: 110 }}
+                />
+                <Button
+                  size="xs"
+                  leftSection={<IconPlus size={12} />}
+                  loading={saving}
+                  disabled={saving}
+                  onClick={handleAdd}
+                >
+                  Add
+                </Button>
+              </Group>
+            )}
           </td>
         </tr>
       )}
@@ -214,7 +233,6 @@ function renderTree(nodeId, allNodes, expandedSet, onToggle, onAddCost, onDelete
   return (
     <>
       <NodeRow
-        key={node.id}
         node={node}
         allNodes={allNodes}
         expanded={expandedSet.has(node.id)}
@@ -222,12 +240,16 @@ function renderTree(nodeId, allNodes, expandedSet, onToggle, onAddCost, onDelete
         onAddCost={onAddCost}
         onDeleteCost={onDeleteCost}
       />
-      {children.map(c => renderTree(c.id, allNodes, expandedSet, onToggle, onAddCost, onDeleteCost))}
+      {children.map(c => (
+        <Fragment key={c.id}>
+          {renderTree(c.id, allNodes, expandedSet, onToggle, onAddCost, onDeleteCost)}
+        </Fragment>
+      ))}
     </>
   );
 }
 
-export default function HierarchyCostsModal({ opened, onClose, task, projectId }) {
+export default function HierarchyCostsModal({ opened, onClose, task, projectId, onCostChanged }) {
   const [nodes, setNodes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(new Set());
@@ -241,10 +263,8 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
     try {
       const { data } = await axios.get(route('projects.tasks.hierarchy-costs', [projectId, task.id]));
       setNodes(data.nodes);
-      // auto-expand root
-      if (data.nodes.length > 0) {
-        setExpanded(new Set([data.nodes[0].id]));
-      }
+      // auto-expand all nodes so add forms are visible at every level
+      setExpanded(new Set(data.nodes.map(n => n.id)));
     } catch (e) {
       console.error(e);
       showNotification({ title: 'Error', message: 'Failed to load hierarchy costs', color: 'red' });
@@ -277,6 +297,7 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
             : n,
         ),
       );
+      onCostChanged?.();
       showNotification({ title: 'Cost added', message: `${Number(data.cost.amount).toFixed(2)} logged`, color: 'teal' });
     } catch (e) {
       console.error(e);
@@ -300,6 +321,7 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
             : n,
         ),
       );
+      onCostChanged?.();
       showNotification({ title: 'Cost deleted', color: 'teal' });
     } catch (e) {
       console.error(e);
@@ -315,7 +337,8 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
 
   const grandTotalActual = useMemo(() => {
     if (!nodes.length) return 0;
-    return nodes.reduce((s, n) => s + n.costs_total, 0);
+    // Cumulative logged costs from the root
+    return cumulativeLoggedCosts(nodes[0].id, nodes);
   }, [nodes]);
 
   const rootId = nodes.length ? nodes[0].id : null;
@@ -325,7 +348,7 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
       opened={opened}
       onClose={onClose}
       title={task ? `Costs — #${task.number}: ${task.name}` : 'Hierarchy Costs'}
-      size="xl"
+      size="90%"
     >
       {loading ? (
         <Center style={{ minHeight: 200 }}>
@@ -342,8 +365,9 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
               <Table.Tr>
                 <Table.Th>Task</Table.Th>
                 <Table.Th ta="right" w={120}>Estimated</Table.Th>
-                <Table.Th ta="right" w={120}>Logged Costs</Table.Th>
+                <Table.Th ta="right" w={120}>Actual Costs</Table.Th>
                 <Table.Th ta="right" w={160}>Profit / Loss</Table.Th>
+                <Table.Th w={40}></Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -360,9 +384,10 @@ export default function HierarchyCostsModal({ opened, onClose, task, projectId }
                   c={grandTotalEstimated - grandTotalActual >= 0 ? 'teal' : 'red'}
                 >
                   {grandTotalEstimated - grandTotalActual >= 0
-                    ? `Profit: ${(grandTotalEstimated - grandTotalActual).toFixed(2)}`
-                    : `Loss: ${(grandTotalActual - grandTotalEstimated).toFixed(2)}`}
+                    ? `+${(grandTotalEstimated - grandTotalActual).toFixed(2)}`
+                    : `-${(grandTotalActual - grandTotalEstimated).toFixed(2)}`}
                 </Table.Td>
+                <Table.Td />
               </Table.Tr>
             </Table.Tfoot>
           </Table>

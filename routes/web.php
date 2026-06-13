@@ -94,6 +94,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         // PROJECT-LEVEL: task-wise costs for the whole project
         Route::get('{project}/tasks/costs', [TaskCostController::class, 'projectCosts'])->name('tasks.costs.project');
+        Route::get('{project}/tasks/project-costs-summary', [TaskController::class, 'projectCostsSummary'])->name('tasks.project-costs-summary');
+        Route::get('{project}/tasks/project-dates-summary', [TaskController::class, 'projectDatesSummary'])->name('tasks.project-dates-summary');
 
         // COMMENTS
         Route::group(['prefix' => '{project}/tasks/{task}', 'as' => 'tasks.'], function () {

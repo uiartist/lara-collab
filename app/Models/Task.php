@@ -51,6 +51,8 @@ class Task extends Model implements AuditableContract, Sortable
         'completed_at',
         'estimated_budget',
         'actual_budget',
+        'estimated_date',
+        'actual_date',
     ];
 
     protected $searchable = [
@@ -68,6 +70,8 @@ class Task extends Model implements AuditableContract, Sortable
         'pricing_type' => PricingType::class,
         'estimated_budget' => 'integer',
         'actual_budget' => 'integer',
+        'estimated_date' => 'date',
+        'actual_date' => 'date',
     ];
 
     protected $appends = [

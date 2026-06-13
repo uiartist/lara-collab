@@ -22,6 +22,7 @@ import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import HierarchyCostsModal from '@/components/HierarchyCostsModal';
+import HierarchyDatesModal from '@/components/HierarchyDatesModal';
 import Comments from './Comments';
 import HierarchyPanel from './HierarchyPanel';
 import LabelsDropdown from './LabelsDropdown';
@@ -51,6 +52,8 @@ export function EditTaskDrawer() {
   const task = findTask(edit.task.id);
 
   const [costsOpened, setCostsOpened] = useState(false);
+  const [costsVersion, setCostsVersion] = useState(0);
+  const [datesOpened, setDatesOpened] = useState(false);
 
   const [data, setData] = useState({
     group_id: '',
@@ -163,7 +166,7 @@ export function EditTaskDrawer() {
         </Group>
       }
       position='right'
-      size={1000}
+      size='90%'
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       transitionProps={{
         transition: 'slide-left',
@@ -190,17 +193,18 @@ export function EditTaskDrawer() {
           <div style={{ gap: "10px" }} className='ms-4 d-flex justify-content-between'>
             <div>
             <button type="button" className="btn btn-primary me-4">Labor</button>
-            <button type="button" className="btn btn-warning me-4">Time</button>
+            <button type="button" className="btn btn-warning me-4" onClick={() => setDatesOpened(true)}>Time</button>
             <button type="button" className="btn btn-success me-4" onClick={() => setCostsOpened(true)}>Costs</button>
             <button type="button" className="btn btn-secondary me-4">Material</button>
             <button type="button" className="btn btn-info me-4">Inventory</button>
             <button type="button" className="btn btn-info me-4">Reports</button>
             </div>
-            <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
+            <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} onCostChanged={() => setCostsVersion(v => v + 1)} />
+            <HierarchyDatesModal opened={datesOpened} onClose={() => setDatesOpened(false)} projectId={task.project_id} task={task} />
             <button type="button" className="btn btn-success">Save</button>
           </div>
 
-          <HierarchyPanel task={task} />
+          <HierarchyPanel task={task} costsVersion={costsVersion} drawerOpened={edit.opened} />
 
           <form className={classes.inner}>
             <div className={classes.content}>

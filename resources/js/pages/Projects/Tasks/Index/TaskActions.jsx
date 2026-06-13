@@ -3,7 +3,7 @@ import { ActionIcon, Group, Menu, rem } from "@mantine/core";
 import { IconArchive, IconArchiveOff, IconDots } from "@tabler/icons-react";
 import { useState } from 'react';
 import { usePage } from "@inertiajs/react";
-import TaskCostsModal from '@/components/TaskCostsModal';
+import HierarchyCostsModal from '@/components/HierarchyCostsModal';
 import { useForm } from "laravel-precognition-react-inertia";
 
 export default function TaskActions({ task, ...props }) {
@@ -44,7 +44,7 @@ export default function TaskActions({ task, ...props }) {
       >
         <span style={{ fontSize: rem(14) }}>{currency?.symbol ?? '$'}</span>
       </ActionIcon>
-      <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
+      <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
       {((can("archive task") && !route().params.archived) ||
         (can("restore task") && route().params.archived)) && (
         <Menu

@@ -127,10 +127,75 @@ class TaskController extends Controller
         // exclude the self-row (depth 0) so only actual children/descendants are returned
         $descendants = $task->descendants()
             ->wherePivot('depth', '>', 0)
-            ->with($task->defaultWith)
+            ->with([...$task->defaultWith, 'taskCosts'])
             ->get();
 
-        return response()->json(['descendants' => $descendants]);
+        // Append costs_total and normalize date fields to date strings on each descendant
+        $descendants->each(function ($t) {
+            $t->costs_total     = (float) $t->taskCosts->sum('amount');
+            $t->estimated_date  = $t->estimated_date?->toDateString();
+            $t->actual_date     = $t->actual_date?->toDateString();
+        });
+
+        // Also load costs for root task
+        $task->loadMissing('taskCosts');
+        $task->costs_total = (float) $task->taskCosts->sum('amount');
+
+        return response()->json([
+            'descendants'          => $descendants,
+            'root_costs_total'     => $task->costs_total,
+            'root_estimated_date'  => $task->estimated_date?->toDateString(),
+            'root_actual_date'     => $task->actual_date?->toDateString(),
+        ]);
+    }
+
+    public function projectDatesSummary(Project $project): JsonResponse
+    {
+        $this->authorize('viewAny', [Task::class, $project]);
+
+        $rootTasks = Task::where('project_id', $project->id)
+            ->where('depth', 0)
+            ->whereNull('archived_at')
+            ->get(['id', 'number', 'name', 'depth', 'estimated_date', 'actual_date']);
+
+        $tasks = $rootTasks->map(fn ($t) => [
+            'id'             => $t->id,
+            'number'         => $t->number,
+            'name'           => $t->name,
+            'depth'          => $t->depth,
+            'estimated_date' => $t->estimated_date?->toDateString(),
+            'actual_date'    => $t->actual_date?->toDateString(),
+        ]);
+
+        return response()->json(['tasks' => $tasks]);
+    }
+
+    public function projectCostsSummary(Project $project): JsonResponse
+    {
+        $this->authorize('viewAny', [Task::class, $project]);
+
+        $rootTasks = Task::where('project_id', $project->id)
+            ->where('depth', 0)
+            ->whereNull('archived_at')
+            ->get(['id', 'number', 'name', 'estimated_budget']);
+
+        $tasks = $rootTasks->map(function ($rootTask) {
+            $allIds = \Illuminate\Support\Facades\DB::table('task_closure')
+                ->where('ancestor_id', $rootTask->id)
+                ->pluck('descendant_id');
+
+            $costsTotal = \App\Models\TaskCost::whereIn('task_id', $allIds)->sum('amount');
+
+            return [
+                'id'               => $rootTask->id,
+                'number'           => $rootTask->number,
+                'name'             => $rootTask->name,
+                'estimated_budget' => $rootTask->estimated_budget, // cents
+                'costs_total'      => (float) $costsTotal,         // dollars
+            ];
+        });
+
+        return response()->json(['tasks' => $tasks]);
     }
 
     public function hierarchyCosts(Project $project, Task $task): JsonResponse
@@ -153,12 +218,13 @@ class TaskController extends Controller
             'number' => $t->number,
             'depth' => $t->depth,
             'estimated_budget' => $t->estimated_budget,
-            'costs_total' => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
-            'costs' => $t->taskCosts->map(fn ($c) => [
-                'id' => $c->id,
+            'actual_budget'    => $t->actual_budget,
+            'costs_total'      => $t->taskCosts->sum(fn ($c) => (float) $c->amount),
+            'costs'            => $t->taskCosts->map(fn ($c) => [
+                'id'     => $c->id,
                 'amount' => (float) $c->amount,
-                'date' => $c->date,
-                'user' => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
+                'date'   => $c->date,
+                'user'   => $c->user ? ['id' => $c->user->id, 'name' => $c->user->name] : null,
             ])->values(),
         ];
 
@@ -173,7 +239,9 @@ class TaskController extends Controller
 
         $data = $request->validate([
             'estimated_budget' => ['nullable', 'numeric', 'min:0'],
-            'actual_budget' => ['nullable', 'numeric', 'min:0'],
+            'actual_budget'    => ['nullable', 'numeric', 'min:0'],
+            'estimated_date'   => ['nullable', 'date'],
+            'actual_date'      => ['nullable', 'date'],
         ]);
 
         $update = [];
@@ -184,12 +252,23 @@ class TaskController extends Controller
                     : null;
             }
         }
+        foreach (['estimated_date', 'actual_date'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $update[$field] = $data[$field]; // already a date string or null
+            }
+        }
 
         $task->update($update);
 
         return response()->json([
             'estimated_budget' => $task->estimated_budget,
+<<<<<<< HEAD
             'actual_budget' => $task->actual_budget,
+=======
+            'actual_budget'    => $task->actual_budget,
+            'estimated_date'   => $task->estimated_date?->toDateString(),
+            'actual_date'      => $task->actual_date?->toDateString(),
+>>>>>>> 43b185c (Add hierarchy costs/dates modals, project summaries, and UI fixes)
         ]);
     }
 

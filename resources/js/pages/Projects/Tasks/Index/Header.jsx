@@ -16,7 +16,8 @@ import {
 } from "@tabler/icons-react";
 // IconCurrencyDollar removed — button will show currency in label instead
 import { useState } from 'react';
-import TaskCostsModal from '@/components/TaskCostsModal';
+import ProjectCostsSummaryModal from '@/components/ProjectCostsSummaryModal';
+import ProjectDatesSummaryModal from '@/components/ProjectDatesSummaryModal';
 
 export default function Header() {
   const { project, currency } = usePage().props;
@@ -29,6 +30,7 @@ export default function Header() {
   const { hasUrlParams } = useTaskFiltersStore();
   const usingFilters = hasUrlParams(["archived"]);
   const [costsOpened, setCostsOpened] = useState(false);
+  const [datesOpened, setDatesOpened] = useState(false);
 
   return (
     <Grid justify="space-between" align="end">
@@ -101,7 +103,14 @@ export default function Header() {
           >
             {`Estimated Costs (${currency?.symbol ?? ""})`}
           </Button>
-          <TaskCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={project.id} task={null} />
+          <Button
+            onClick={() => setDatesOpened(true)}
+            radius="xl"
+          >
+            Projected Dates
+          </Button>
+          <ProjectCostsSummaryModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={project.id} />
+          <ProjectDatesSummaryModal opened={datesOpened} onClose={() => setDatesOpened(false)} projectId={project.id} />
         </Group>
       </Grid.Col>
     </Grid>
