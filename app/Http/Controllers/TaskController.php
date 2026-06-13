@@ -262,13 +262,9 @@ class TaskController extends Controller
 
         return response()->json([
             'estimated_budget' => $task->estimated_budget,
-<<<<<<< HEAD
-            'actual_budget' => $task->actual_budget,
-=======
             'actual_budget'    => $task->actual_budget,
             'estimated_date'   => $task->estimated_date?->toDateString(),
             'actual_date'      => $task->actual_date?->toDateString(),
->>>>>>> 43b185c (Add hierarchy costs/dates modals, project summaries, and UI fixes)
         ]);
     }
 
