@@ -11,6 +11,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MyWork\ActivityController;
 use App\Http\Controllers\MyWork\MyWorkTaskController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Settings\ConfigurationController;
 use App\Http\Controllers\Settings\DevelopmentController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Settings\OwnerCompanyController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\SubTaskController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Task\AttachmentController;
 use App\Http\Controllers\Task\CommentController;
 use App\Http\Controllers\Task\GroupController;
@@ -125,12 +127,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('users/{userId}/restore', [UserController::class, 'restore'])->name('users.restore');
 
     // Suppliers
-    Route::resource('suppliers', \App\Http\Controllers\SupplierController::class)->except(['show']);
-    Route::post('suppliers/{supplierId}/restore', [\App\Http\Controllers\SupplierController::class, 'restore'])->name('suppliers.restore');
+    Route::resource('suppliers', SupplierController::class)->except(['show']);
+    Route::post('suppliers/{supplierId}/restore', [SupplierController::class, 'restore'])->name('suppliers.restore');
 
     // Purchase Requests
-    Route::get('purchase-requests/suppliers', [\App\Http\Controllers\PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');
-    Route::post('tasks/{task}/purchase-requests', [\App\Http\Controllers\PurchaseRequestController::class, 'store'])->name('tasks.purchase-requests.store');
+    Route::get('purchase-requests/suppliers', [PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');
+    Route::post('tasks/{task}/purchase-requests', [PurchaseRequestController::class, 'store'])->name('tasks.purchase-requests.store');
 
     // Invoices
     Route::resource('invoices', InvoiceController::class)->except(['show']);

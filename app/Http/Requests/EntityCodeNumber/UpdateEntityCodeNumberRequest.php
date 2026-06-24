@@ -16,7 +16,7 @@ class UpdateEntityCodeNumberRequest extends FormRequest
         $entityCodeNumber = $this->route('code_number');
 
         return [
-            'entity_type' => 'required|string|max:100|unique:entity_code_numbers,entity_type,' . $entityCodeNumber->id,
+            'entity_type' => 'required|string|max:100|unique:entity_code_numbers,entity_type,'.$entityCodeNumber->id,
             'code_number' => 'required|string|max:2',
         ];
     }
