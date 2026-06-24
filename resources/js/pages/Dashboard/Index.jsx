@@ -7,6 +7,7 @@ import { ProjectCard } from "./Cards/ProjectCard";
 import RecentComments from "./Cards/RecentComments";
 import RecentlyAssignedTasks from "./Cards/RecentlyAssignedTasks";
 import classes from "./css/Index.module.css";
+import CircularMenu from "@/components/CircularMenu";
 
 const Dashboard = () => {
   const { projects, overdueTasks, recentlyAssignedTasks, recentComments } = usePage().props;
@@ -19,7 +20,12 @@ const Dashboard = () => {
 
   return (
     <>
-      <Title mb="xl">Dashboard</Title>
+      <Title mb="md">Dashboard</Title>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+        <div style={{ marginLeft: 8 }}>
+          <CircularMenu size={360} radius={0.65} />
+        </div>
+      </div>
       <Masonry
         breakpointCols={breakpointColumns}
         className={classes.myMasonryGrid}

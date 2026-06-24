@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { IconCheck, IconPlus, IconTrash, IconX } from '@tabler/icons-react';
+import { IconCheck, IconChevronDown, IconChevronRight, IconPlus, IconTrash, IconX } from '@tabler/icons-react';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 
@@ -90,7 +90,7 @@ function HeaderRow() {
 }
 
 // ─── Single node row (displays budget inputs and actions) ─────────────────────
-function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, childrenTotalActual, hasChildren }) {
+function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, childrenTotalActual, hasChildren, isCollapsed, onToggleCollapse }) {
   const estimatedRef = useRef((node.estimated_budget || 0) / 100);
   const [estimated, setEstimated] = useState((node.estimated_budget || 0) / 100);
   const [estDate, setEstDate] = useState(toDateInput(node.estimated_date));
@@ -126,6 +126,19 @@ function NodeRow({ node, depth, isRoot, onAddChild, onDelete, onBudgetSave, chil
       {/* Name */}
       <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
         <Group gap={6} wrap='nowrap'>
+          {hasChildren ? (
+            <ActionIcon
+              size='sm'
+              variant='subtle'
+              color='gray'
+              onClick={() => onToggleCollapse(node.id)}
+              style={{ flexShrink: 0 }}
+            >
+              {isCollapsed ? <IconChevronRight size={13} /> : <IconChevronDown size={13} />}
+            </ActionIcon>
+          ) : (
+            <div style={{ width: 26, flexShrink: 0 }} />
+          )}
           <Badge size='xs' variant='light' color={depth === 0 ? 'blue' : 'gray'} style={{ flexShrink: 0 }}>
             {getLevelLabel(node.depth ?? depth)}
           </Badge>
@@ -336,11 +349,14 @@ function NodeWithChildren({
   onAddSubmit,
   saving,
   isRoot,
+  collapsedNodes,
+  onToggleCollapse,
 }) {
   const children = allNodes.filter(n => n.parent_id === node.id);
-  const childTotalEst = children.reduce((s, c) => s + (c.estimated_budget || 0), 0);
   // Use cumulative logged costs so costs from deep descendants bubble up
   const childTotalAct = children.reduce((s, c) => s + cumulativeLoggedCosts(c.id, allNodes), 0);
+
+  const isCollapsed = collapsedNodes.has(node.id);
 
   return (
     <>
@@ -353,10 +369,12 @@ function NodeWithChildren({
         onBudgetSave={onBudgetSave}
         hasChildren={children.length > 0}
         childrenTotalActual={childTotalAct}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={onToggleCollapse}
       />
 
       {/* Render children recursively */}
-      {children.map(child => (
+      {!isCollapsed && children.map(child => (
         <NodeWithChildren
           key={child.id}
           node={child}
@@ -371,11 +389,13 @@ function NodeWithChildren({
           onAddSubmit={onAddSubmit}
           saving={saving}
           isRoot={false}
+          collapsedNodes={collapsedNodes}
+          onToggleCollapse={onToggleCollapse}
         />
       ))}
 
       {/* Inline add-child form */}
-      {addingChildOf === node.id && (
+      {!isCollapsed && addingChildOf === node.id && (
         <AddChildRow
           depth={depth + 1}
           labelDepth={(node.depth ?? depth) + 1}
@@ -388,7 +408,7 @@ function NodeWithChildren({
       )}
 
       {/* Summary row for direct children */}
-      {children.length > 0 && (
+      {!isCollapsed && children.length > 0 && (
         <SummaryRow
           depth={depth + 1}
           parentEstimated={node.estimated_budget || 0}
@@ -410,6 +430,7 @@ export default function HierarchyPanel({ task, costsVersion, drawerOpened }) {
   const [addingChildOf, setAddingChildOf] = useState(null); // parent node id
   const [addForm, setAddForm] = useState({ name: '', estimated_budget: '' });
   const [saving, setSaving] = useState(false);
+  const [collapsedNodes, setCollapsedNodes] = useState(new Set());
 
   const fetchDescendants = () => {
     if (!task?.id) return;
@@ -434,6 +455,29 @@ export default function HierarchyPanel({ task, costsVersion, drawerOpened }) {
 
   // All nodes visible in the tree: root (with costs_total + persisted dates injected) + descendants
   const allNodes = [{ ...task, costs_total: rootCostsTotal, ...rootDates }, ...descendants];
+
+  const toggleCollapse = nodeId => {
+    setCollapsedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  };
+
+  const onCollapseAll = () => {
+    const parentIds = allNodes
+      .filter(n => descendants.some(d => d.parent_id === n.id))
+      .map(n => n.id);
+    setCollapsedNodes(new Set(parentIds));
+  };
+
+  const onExpandAll = () => {
+    setCollapsedNodes(new Set());
+  };
 
   const onBudgetSave = (nodeId, field, value) => {
     const isDateField = field === 'estimated_date' || field === 'actual_date';
@@ -503,19 +547,45 @@ export default function HierarchyPanel({ task, costsVersion, drawerOpened }) {
     <Box mt='lg' mx={24}>
       <Group justify='space-between' mb='xs'>
         <Text fw={600} size='sm'>
-          Task Hierarchy &amp; Budget
+          Task Hierarchy & Budget
         </Text>
-        <Button
-          size='xs'
-          variant='light'
-          leftSection={<IconPlus size={12} />}
-          onClick={() => {
-            setAddingChildOf(task.id);
-            setAddForm({ name: '', estimated_budget: '', actual_budget: '' });
-          }}
-        >
-          Add child
-        </Button>
+        <Group gap='xs'>
+          <Button
+            size='xs'
+            variant='subtle'
+            color='gray'
+            onClick={onCollapseAll}
+          >
+            Collapse All
+          </Button>
+          <Button
+            size='xs'
+            variant='subtle'
+            color='gray'
+            onClick={onExpandAll}
+          >
+            Expand All
+          </Button>
+          <Button
+            size='xs'
+            variant='light'
+            leftSection={<IconPlus size={12} />}
+            onClick={() => {
+              setAddingChildOf(task.id);
+              setAddForm({ name: '', estimated_budget: '', actual_budget: '' });
+              setCollapsedNodes(prev => {
+                if (prev.has(task.id)) {
+                  const next = new Set(prev);
+                  next.delete(task.id);
+                  return next;
+                }
+                return prev;
+              });
+            }}
+          >
+            Add child
+          </Button>
+        </Group>
       </Group>
 
       <div
@@ -542,12 +612,22 @@ export default function HierarchyPanel({ task, costsVersion, drawerOpened }) {
             setAddingChildOf={id => {
               setAddingChildOf(id);
               setAddForm({ name: '', estimated_budget: '', actual_budget: '' });
+              setCollapsedNodes(prev => {
+                if (prev.has(id)) {
+                  const next = new Set(prev);
+                  next.delete(id);
+                  return next;
+                }
+                return prev;
+              });
             }}
             onBudgetSave={onBudgetSave}
             onDelete={onDelete}
             onAddSubmit={onAddSubmit}
             saving={saving}
             isRoot
+            collapsedNodes={collapsedNodes}
+            onToggleCollapse={toggleCollapse}
           />
         )}
       </div>

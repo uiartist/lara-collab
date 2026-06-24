@@ -1,0 +1,29 @@
+# Local Environment Configuration Shield
+.env
+.env.example
+.env.prod
+.env.local
+
+# Database Dumps and Caches
+*.sqlite
+database/*.sqlite
+database/database.sqlite
+storage/framework/cache/data/**
+
+# Compiled Node Dependencies & Visual Assets
+node_modules/
+public/build/
+public/storage/
+storage/app/public/**
+
+# Composer Packages & Compressed Archives
+vendor/
+lara-collab.zip
+vendor.zip
+
+# Framework System Logs & Testing Dumps
+storage/logs/*.log
+storage/framework/sessions/**
+storage/framework/views/**
+.phpunit.cache/
+tests/_output/

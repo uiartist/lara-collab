@@ -1,4 +1,5 @@
-import { Badge, Group, Loader, Modal, Table, Text } from '@mantine/core';
+import { ActionIcon, Badge, Button, Group, Loader, Modal, Table, Text } from '@mantine/core';
+import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -20,7 +21,7 @@ function dateDiff(estimated, actual) {
   return dayjs(actual).diff(dayjs(estimated), 'day');
 }
 
-function NodeRow({ node, allNodes }) {
+function NodeRow({ node, hasChildren, isCollapsed, onToggleCollapse }) {
   const indent = (node.depth ?? 0) * 20;
   const diff = dateDiff(node.estimated_date, node.actual_date);
   const onTime = diff !== null && diff <= 0;
@@ -29,6 +30,19 @@ function NodeRow({ node, allNodes }) {
     <Table.Tr>
       <Table.Td>
         <Group gap={6} wrap="nowrap" style={{ paddingLeft: indent }}>
+          {hasChildren ? (
+            <ActionIcon
+              size='sm'
+              variant='subtle'
+              color='gray'
+              onClick={() => onToggleCollapse(node.id)}
+              style={{ flexShrink: 0 }}
+            >
+              {isCollapsed ? <IconChevronRight size={13} /> : <IconChevronDown size={13} />}
+            </ActionIcon>
+          ) : (
+            <div style={{ width: 26, flexShrink: 0 }} />
+          )}
           <Badge size="xs" color={getLevelColor(node.depth ?? 0)} variant="light">
             {getLevelLabel(node.depth ?? 0)}
           </Badge>
@@ -60,15 +74,23 @@ function NodeRow({ node, allNodes }) {
   );
 }
 
-function renderTree(nodeId, allNodes) {
+function renderTree(nodeId, allNodes, collapsedNodes, onToggleCollapse) {
   const node = allNodes.find(n => n.id === nodeId);
   if (!node) return null;
   const children = allNodes.filter(n => n.parent_id === nodeId);
+  const isCollapsed = collapsedNodes.has(nodeId);
+
   return (
     <>
-      <NodeRow key={node.id} node={node} allNodes={allNodes} />
-      {children.map(c => (
-        <Fragment key={c.id}>{renderTree(c.id, allNodes)}</Fragment>
+      <NodeRow
+        key={node.id}
+        node={node}
+        hasChildren={children.length > 0}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={onToggleCollapse}
+      />
+      {!isCollapsed && children.map(c => (
+        <Fragment key={c.id}>{renderTree(c.id, allNodes, collapsedNodes, onToggleCollapse)}</Fragment>
       ))}
     </>
   );
@@ -77,6 +99,7 @@ function renderTree(nodeId, allNodes) {
 export default function HierarchyDatesModal({ opened, onClose, task, projectId }) {
   const [allNodes, setAllNodes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [collapsedNodes, setCollapsedNodes] = useState(new Set());
 
   useEffect(() => {
     if (opened && task) fetchData();
@@ -126,19 +149,56 @@ export default function HierarchyDatesModal({ opened, onClose, task, projectId }
       ) : allNodes.length === 0 ? (
         <Text c="dimmed" ta="center" py="xl">No data</Text>
       ) : (
-        <Table withTableBorder withColumnBorders striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Task</Table.Th>
-              <Table.Th ta="center" w={145}>Est. Date</Table.Th>
-              <Table.Th ta="center" w={145}>Actual Date</Table.Th>
-              <Table.Th ta="center" w={120}>Variance</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {allNodes.length > 0 && renderTree(allNodes[0].id, allNodes)}
-          </Table.Tbody>
-        </Table>
+        <>
+          <Group mb="xs">
+            <Button
+              size='xs'
+              variant='subtle'
+              color='gray'
+              onClick={() => {
+                const parentIds = new Set(
+                  allNodes
+                    .filter(n => allNodes.some(d => d.parent_id === n.id))
+                    .map(n => n.id)
+                );
+                setCollapsedNodes(parentIds);
+              }}
+            >
+              Collapse All
+            </Button>
+            <Button
+              size='xs'
+              variant='subtle'
+              color='gray'
+              onClick={() => setCollapsedNodes(new Set())}
+            >
+              Expand All
+            </Button>
+          </Group>
+          <Table withTableBorder withColumnBorders striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Task</Table.Th>
+                <Table.Th ta="center" w={145}>Est. Date</Table.Th>
+                <Table.Th ta="center" w={145}>Actual Date</Table.Th>
+                <Table.Th ta="center" w={120}>Variance</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {allNodes.length > 0 && renderTree(allNodes[0].id, allNodes, collapsedNodes, (nodeId) => {
+                setCollapsedNodes(prev => {
+                  const next = new Set(prev);
+                  if (next.has(nodeId)) {
+                    next.delete(nodeId);
+                  } else {
+                    next.add(nodeId);
+                  }
+                  return next;
+                });
+              })}
+            </Table.Tbody>
+          </Table>
+        </>
       )}
     </Modal>
   );

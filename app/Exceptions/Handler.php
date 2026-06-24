@@ -33,7 +33,7 @@ class Handler extends ExceptionHandler
     /**
      * Prepare exception for rendering.
      *
-     * @return Throwable
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($request, Throwable $e)
     {
@@ -41,10 +41,17 @@ class Handler extends ExceptionHandler
         $response = parent::render($request, $e);
 
         if ($request->wantsJson()) {
-            return response()->json([
+            $payload = [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTrace(),
-            ], $response->status());
+            ];
+
+            if (config('app.debug')) {
+                $payload['exception'] = get_class($e);
+                $payload['file'] = $e->getFile();
+                $payload['line'] = $e->getLine();
+            }
+
+            return response()->json($payload, $response->status());
         }
 
         if (! app()->environment(['local', 'testing']) && in_array($response->status(), [500, 503, 404])) {

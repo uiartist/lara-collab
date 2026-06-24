@@ -4,3 +4,64 @@
     --mantine-color-body: var(--mantine-color-gray-0);
     --mantine-color-anchor: var(--mantine-color-blue-7);
 }
+
+/* Circular module menu styles */
+.circular-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.2rem 0 0.6rem 0;
+    padding-bottom: 0.4rem;
+}
+
+.circular-menu .ring {
+    position: relative;
+    border-radius: 50%;
+    display: block;
+    will-change: transform;
+    margin: 0 auto;
+}
+
+.circular-menu .node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: 0 0;
+    text-decoration: none;
+    pointer-events: auto;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+.circular-menu .node-inner {
+    display: inline-block;
+}
+
+.circular-menu .node-card {
+    width: 84px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,245,250,0.96));
+    transition: box-shadow 120ms ease;
+}
+
+/* hub removed - styles no longer needed */
+
+/* Static circular layout (no rotation) */
+
+/* Remove hover color/font changes and avoid flicker: keep nodes visually stable on hover */
+.circular-menu .node:focus,
+.circular-menu .node:hover {
+    outline: none;
+}
+
+@media (max-width: 600px) {
+    .circular-menu .node-card { width: 78px; height: 38px; }
+    .circular-menu { width: 260px; height: 260px; }
+}
+
+/* Wrapper to position the menu under the title and be responsive */
+/* circular-wrapper removed; menu is centered via inline wrapper in Dashboard */

@@ -153,13 +153,40 @@ class TaskController extends Controller
     {
         $this->authorize('viewAny', [Task::class, $project]);
 
-        $rootTasks = Task::where('project_id', $project->id)
-            ->where('depth', 0)
+        $allTasks = Task::where('project_id', $project->id)
             ->whereNull('archived_at')
-            ->get(['id', 'number', 'name', 'depth', 'estimated_date', 'actual_date']);
+            ->get(['id', 'parent_id', 'number', 'name', 'depth', 'estimated_date', 'actual_date']);
 
-        $tasks = $rootTasks->map(fn ($t) => [
+        $grouped = $allTasks->groupBy('parent_id');
+        $sortedTasks = collect();
+
+        $buildTree = function ($parentId) use (&$buildTree, $grouped, &$sortedTasks) {
+            $children = $grouped->get($parentId);
+            if ($children) {
+                foreach ($children as $child) {
+                    $sortedTasks->push($child);
+                    $buildTree($child->id);
+                }
+            }
+        };
+
+        $allIds = $allTasks->pluck('id')->all();
+        $rootTasks = $allTasks->filter(fn ($t) => $t->depth == 0 || !in_array($t->parent_id, $allIds));
+
+        foreach ($rootTasks as $rootTask) {
+            $sortedTasks->push($rootTask);
+            $buildTree($rootTask->id);
+        }
+
+        $sortedIds = $sortedTasks->pluck('id')->all();
+        $remaining = $allTasks->filter(fn ($t) => !in_array($t->id, $sortedIds));
+        foreach ($remaining as $rem) {
+            $sortedTasks->push($rem);
+        }
+
+        $tasks = $sortedTasks->map(fn ($t) => [
             'id'             => $t->id,
+            'parent_id'      => $t->parent_id,
             'number'         => $t->number,
             'name'           => $t->name,
             'depth'          => $t->depth,

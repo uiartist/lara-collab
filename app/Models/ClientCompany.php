@@ -18,6 +18,7 @@ class ClientCompany extends Model implements AuditableContract
     use Archivable, Auditable, HasFactory, IsSearchable, IsSortable;
 
     protected $fillable = [
+        'code_number',
         'name',
         'address',
         'postal_code',

@@ -17,6 +17,7 @@ class OwnerCompany extends Model implements AuditableContract
     public $timestamps = false;
 
     protected $fillable = [
+        'code_number',
         'name',
         'logo',
         'address',

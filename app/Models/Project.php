@@ -20,6 +20,7 @@ class Project extends Model implements AuditableContract
     use Archivable, Auditable, Favoriteable, IsSearchable, IsSortable;
 
     protected $fillable = [
+        'code_number',
         'name',
         'description',
         'default_pricing_type',

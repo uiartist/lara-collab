@@ -11,6 +11,7 @@ class Development extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'code_number',
         'user_id',
         'name',
         'description',

@@ -10,6 +10,7 @@ import {
   IconListDetails,
   IconReportAnalytics,
   IconSettings,
+  IconTruck,
   IconUsers,
 } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -87,6 +88,13 @@ export default function Sidebar() {
         visible: can("view users"),
       },
       {
+        label: "Suppliers",
+        icon: IconTruck,
+        link: route("suppliers.index"),
+        active: route().current("suppliers.*"),
+        visible: can("view suppliers"),
+      },
+      {
         label: "Invoices",
         icon: IconFileDollar,
         link: route("invoices.index"),
@@ -125,7 +133,7 @@ export default function Sidebar() {
         icon: IconSettings,
         active: route().current("settings.*"),
         opened: route().current("settings.*"),
-        visible: can("view owner company") || can("view roles") || can("view labels") || can("view configuration") || can("view development") || can("view security"),
+        visible: can("view owner company") || can("view roles") || can("view labels") || can("view configuration") || can("view development") || can("view security") || can("view code numbers"),
         links: [
           {
             label: "Company",
@@ -163,6 +171,12 @@ export default function Sidebar() {
             link: route("settings.security.index"),
             active: route().current("settings.security.*"),
             visible: can("view security"),
+          },
+          {
+            label: "Code Numbers",
+            link: route("settings.code-numbers.index"),
+            active: route().current("settings.code-numbers.*"),
+            visible: can("view code numbers"),
           },
         ],
       },

@@ -14,6 +14,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Settings\ConfigurationController;
 use App\Http\Controllers\Settings\DevelopmentController;
+use App\Http\Controllers\Settings\EntityCodeNumberController;
 use App\Http\Controllers\Settings\LabelController;
 use App\Http\Controllers\Settings\OwnerCompanyController;
 use App\Http\Controllers\Settings\RoleController;
@@ -123,6 +124,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::post('users/{userId}/restore', [UserController::class, 'restore'])->name('users.restore');
 
+    // Suppliers
+    Route::resource('suppliers', \App\Http\Controllers\SupplierController::class)->except(['show']);
+    Route::post('suppliers/{supplierId}/restore', [\App\Http\Controllers\SupplierController::class, 'restore'])->name('suppliers.restore');
+
+    // Purchase Requests
+    Route::get('purchase-requests/suppliers', [\App\Http\Controllers\PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');
+    Route::post('tasks/{task}/purchase-requests', [\App\Http\Controllers\PurchaseRequestController::class, 'store'])->name('tasks.purchase-requests.store');
+
     // Invoices
     Route::resource('invoices', InvoiceController::class)->except(['show']);
     Route::group(['prefix' => 'invoices', 'as' => 'invoices.'], function () {
@@ -163,6 +172,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::resource('security', SecurityController::class)->except(['show']);
         Route::post('security/{secId}/restore', [SecurityController::class, 'restore'])->name('security.restore');
 
+        Route::resource('code-numbers', EntityCodeNumberController::class)->except(['show']);
     });
 
     // Account

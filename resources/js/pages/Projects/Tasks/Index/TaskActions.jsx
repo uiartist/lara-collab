@@ -1,13 +1,15 @@
 import { openConfirmModal } from "@/components/ConfirmModal";
 import { ActionIcon, Group, Menu, rem } from "@mantine/core";
-import { IconArchive, IconArchiveOff, IconDots } from "@tabler/icons-react";
+import { IconArchive, IconArchiveOff, IconDots, IconClipboardList } from "@tabler/icons-react";
 import { useState } from 'react';
 import { usePage } from "@inertiajs/react";
 import HierarchyCostsModal from '@/components/HierarchyCostsModal';
+import WorkOrderModal from '@/components/WorkOrderModal';
 import { useForm } from "laravel-precognition-react-inertia";
 
 export default function TaskActions({ task, ...props }) {
   const [costsOpened, setCostsOpened] = useState(false);
+  const [workOrderOpened, setWorkOrderOpened] = useState(false);
   const { currency } = usePage().props;
   const archiveForm = useForm(
     "delete",
@@ -45,6 +47,23 @@ export default function TaskActions({ task, ...props }) {
         <span style={{ fontSize: rem(14) }}>{currency?.symbol ?? '$'}</span>
       </ActionIcon>
       <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} />
+      {can("create purchase request") && (
+        <>
+          <ActionIcon
+            title="Work Order"
+            variant="subtle"
+            onClick={() => setWorkOrderOpened(true)}
+          >
+            <IconClipboardList style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+          </ActionIcon>
+          <WorkOrderModal
+            opened={workOrderOpened}
+            onClose={() => setWorkOrderOpened(false)}
+            projectId={task.project_id}
+            task={task}
+          />
+        </>
+      )}
       {((can("archive task") && !route().params.archived) ||
         (can("restore task") && route().params.archived)) && (
         <Menu

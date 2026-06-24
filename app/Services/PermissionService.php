@@ -26,6 +26,7 @@ class PermissionService
             'Invoices' => ['view invoices', 'create invoice', 'edit invoice', 'archive invoice', 'restore invoice', 'change invoice status', 'download invoice', 'print invoice'],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
             'Activities' => ['view activities'],
+            'Code Number' => ['view code numbers', 'create code number', 'edit code number', 'delete code number'],
         ],
         'manager' => [
             'User' => ['view users'],
