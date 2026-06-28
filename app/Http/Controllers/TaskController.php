@@ -173,7 +173,7 @@ class TaskController extends Controller
         };
 
         $allIds = $allTasks->pluck('id')->all();
-        $rootTasks = $allTasks->filter(fn ($t) => $t->depth == 0 || !in_array($t->parent_id, $allIds));
+        $rootTasks = $allTasks->filter(fn ($t) => $t->depth == 0 || ! in_array($t->parent_id, $allIds));
 
         foreach ($rootTasks as $rootTask) {
             $sortedTasks->push($rootTask);
@@ -181,17 +181,17 @@ class TaskController extends Controller
         }
 
         $sortedIds = $sortedTasks->pluck('id')->all();
-        $remaining = $allTasks->filter(fn ($t) => !in_array($t->id, $sortedIds));
+        $remaining = $allTasks->filter(fn ($t) => ! in_array($t->id, $sortedIds));
         foreach ($remaining as $rem) {
             $sortedTasks->push($rem);
         }
 
         $tasks = $sortedTasks->map(fn ($t) => [
-            'id'             => $t->id,
-            'parent_id'      => $t->parent_id,
-            'number'         => $t->number,
-            'name'           => $t->name,
-            'depth'          => $t->depth,
+            'id' => $t->id,
+            'parent_id' => $t->parent_id,
+            'number' => $t->number,
+            'name' => $t->name,
+            'depth' => $t->depth,
             'estimated_date' => $t->estimated_date?->toDateString(),
             'actual_date' => $t->actual_date?->toDateString(),
         ]);

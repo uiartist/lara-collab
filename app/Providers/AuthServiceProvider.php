@@ -3,7 +3,13 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use App\Models\EntityCodeNumber;
+use App\Models\PurchaseRequest;
+use App\Models\Supplier;
 use App\Models\User;
+use App\Policies\EntityCodeNumberPolicy;
+use App\Policies\PurchaseRequestPolicy;
+use App\Policies\SupplierPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -18,9 +24,9 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // map TaskCost to its policy
         App\Models\TaskCost::class => App\Policies\TaskCostPolicy::class,
-        \App\Models\Supplier::class => \App\Policies\SupplierPolicy::class,
-        \App\Models\PurchaseRequest::class => \App\Policies\PurchaseRequestPolicy::class,
-        \App\Models\EntityCodeNumber::class => \App\Policies\EntityCodeNumberPolicy::class,
+        Supplier::class => SupplierPolicy::class,
+        PurchaseRequest::class => PurchaseRequestPolicy::class,
+        EntityCodeNumber::class => EntityCodeNumberPolicy::class,
     ];
 
     /**

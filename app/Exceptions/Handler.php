@@ -33,7 +33,7 @@ class Handler extends ExceptionHandler
     /**
      * Prepare exception for rendering.
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function render($request, Throwable $e)
     {

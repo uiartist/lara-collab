@@ -17,7 +17,7 @@ class SupplierResource extends JsonResource
             'phone'          => $this->phone,
             'address'        => $this->address,
             'contact_person' => $this->contact_person,
-            'archived_at'    => $this->archived_at,
+            'archived_at' => $this->archived_at,
         ];
     }
 }
