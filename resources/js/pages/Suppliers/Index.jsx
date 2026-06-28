@@ -15,6 +15,8 @@ const SuppliersIndex = () => {
   const { items } = usePage().props;
 
   const columns = prepareColumns([
+    { label: "ID", sortable: false },
+    { label: "Code Number", sortable: false },
     { label: "Supplier", column: "name" },
     { label: "Email", column: "email" },
     { label: "Phone", sortable: false },

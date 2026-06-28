@@ -5,6 +5,12 @@ export default function TableRow({ item }) {
   return (
     <Table.Tr key={item.id}>
       <Table.Td>
+        <Text fz="sm">{item.id}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text fz="sm">{item.code_number ?? "—"}</Text>
+      </Table.Td>
+      <Table.Td>
         <Text fz="sm" fw={500}>{item.name}</Text>
       </Table.Td>
       <Table.Td>
