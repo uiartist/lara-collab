@@ -10,11 +10,11 @@ class EntityCodeNumber extends Model
 {
     use IsSearchable, IsSortable;
 
-    protected $fillable = ['entity_type', 'code_number', 'min_value', 'max_value'];
+    protected $fillable = ['entity_type', 'code_number', 'min_range', 'max_range'];
 
     protected $casts = [
-        'min_value' => 'integer',
-        'max_value' => 'integer',
+        'min_range' => 'integer',
+        'max_range' => 'integer',
     ];
 
     protected $searchable = [

@@ -16,8 +16,8 @@ class StoreEntityCodeNumberRequest extends FormRequest
         return [
             'entity_type' => 'required|string|max:100|unique:entity_code_numbers,entity_type',
             'code_number' => 'required|string|max:2',
-            'min_value' => 'nullable|integer|min:0',
-            'max_value' => 'nullable|integer|gte:min_value',
+            'min_range' => 'required|integer|min:0',
+            'max_range' => 'required|integer|gt:min_range',
         ];
     }
 }

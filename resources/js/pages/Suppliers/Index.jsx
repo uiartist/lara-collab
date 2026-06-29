@@ -12,11 +12,13 @@ import { IconPlus } from "@tabler/icons-react";
 import TableRow from "./TableRow";
 
 const SuppliersIndex = () => {
-  const { items } = usePage().props;
+  const { items, codeNumberSettings } = usePage().props;
 
   const columns = prepareColumns([
     { label: "ID", sortable: false },
     { label: "Code Number", sortable: false },
+    { label: "Min Range", sortable: false },
+    { label: "Max Range", sortable: false },
     { label: "Supplier", column: "name" },
     { label: "Email", column: "email" },
     { label: "Phone", sortable: false },
@@ -29,7 +31,9 @@ const SuppliersIndex = () => {
   ]);
 
   const rows = items.data.length ? (
-    items.data.map((item) => <TableRow item={item} key={item.id} />)
+    items.data.map((item) => (
+      <TableRow item={item} codeNumberSettings={codeNumberSettings} key={item.id} />
+    ))
   ) : (
     <TableRowEmpty colSpan={columns.length} />
   );

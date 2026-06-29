@@ -13,6 +13,8 @@ const EntityCodeNumberCreate = () => {
   const [form, submit, updateValue] = useForm("post", route("settings.code-numbers.store"), {
     entity_type: "",
     code_number: "",
+    min_range: "",
+    max_range: "",
   });
 
   return (
@@ -58,6 +60,26 @@ const EntityCodeNumberCreate = () => {
             value={form.data.code_number}
             onChange={(e) => updateValue("code_number", e.target.value.toUpperCase())}
             error={form.errors.code_number}
+          />
+          <TextInput
+            label="Min Range"
+            placeholder="e.g. 1"
+            description="Minimum sequence value for the generated codes"
+            mt="md"
+            type="number"
+            value={form.data.min_range}
+            onChange={(e) => updateValue("min_range", e.target.value)}
+            error={form.errors.min_range}
+          />
+          <TextInput
+            label="Max Range"
+            placeholder="e.g. 1000"
+            description="Maximum sequence value for the generated codes"
+            mt="md"
+            type="number"
+            value={form.data.max_range}
+            onChange={(e) => updateValue("max_range", e.target.value)}
+            error={form.errors.max_range}
           />
 
           <Group justify="space-between" mt="xl">

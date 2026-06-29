@@ -9,11 +9,14 @@ import { Anchor, Breadcrumbs, Grid, Group, NativeSelect, TextInput, Title } from
 
 const EntityCodeNumberEdit = () => {
   const { item, entityTypes } = usePage().props;
+  const rangesAssigned = item.min_range !== null || item.max_range !== null;
 
   const [form, submit, updateValue] = useForm("post", route("settings.code-numbers.update", item.id), {
     _method: "put",
     entity_type: item.entity_type,
     code_number: item.code_number,
+    min_range: item.min_range ?? "",
+    max_range: item.max_range ?? "",
   });
 
   return (
@@ -59,6 +62,28 @@ const EntityCodeNumberEdit = () => {
             value={form.data.code_number}
             onChange={(e) => updateValue("code_number", e.target.value.toUpperCase())}
             error={form.errors.code_number}
+          />
+          <TextInput
+            label="Min Range"
+            placeholder="e.g. 1"
+            description="Minimum sequence value for the generated codes"
+            mt="md"
+            type="number"
+            value={form.data.min_range}
+            onChange={(e) => updateValue("min_range", e.target.value)}
+            error={form.errors.min_range}
+            readOnly={rangesAssigned}
+          />
+          <TextInput
+            label="Max Range"
+            placeholder="e.g. 1000"
+            description="Maximum sequence value for the generated codes"
+            mt="md"
+            type="number"
+            value={form.data.max_range}
+            onChange={(e) => updateValue("max_range", e.target.value)}
+            error={form.errors.max_range}
+            readOnly={rangesAssigned}
           />
 
           <Group justify="space-between" mt="xl">

@@ -1,7 +1,7 @@
 import TableRowActions from "@/components/TableRowActions";
 import { Table, Text } from "@mantine/core";
 
-export default function TableRow({ item }) {
+export default function TableRow({ item, codeNumberSettings }) {
   return (
     <Table.Tr key={item.id}>
       <Table.Td>
@@ -9,6 +9,12 @@ export default function TableRow({ item }) {
       </Table.Td>
       <Table.Td>
         <Text fz="sm">{item.code_number ?? "—"}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text fz="sm">{codeNumberSettings?.min_range ?? "—"}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text fz="sm">{codeNumberSettings?.max_range ?? "—"}</Text>
       </Table.Td>
       <Table.Td>
         <Text fz="sm" fw={500}>{item.name}</Text>

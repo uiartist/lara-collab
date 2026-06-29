@@ -11,6 +11,7 @@ const SupplierEdit = () => {
   const { item } = usePage().props;
 
   const [form, submit, updateValue] = useForm("put", route("suppliers.update", item.id), {
+    code_number: item.code_number ?? "",
     name: item.name ?? "",
     email: item.email ?? "",
     phone: item.phone ?? "",
@@ -36,6 +37,13 @@ const SupplierEdit = () => {
       <ContainerBox maw={600}>
         <form onSubmit={submit}>
           <Grid gutter="lg">
+            <Grid.Col span={12}>
+              <TextInput
+                label="Code Number"
+                value={form.data.code_number}
+                readOnly
+              />
+            </Grid.Col>
             <Grid.Col span={12}>
               <TextInput
                 label="Name"
