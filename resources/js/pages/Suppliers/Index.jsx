@@ -17,8 +17,6 @@ const SuppliersIndex = () => {
   const columns = prepareColumns([
     { label: "ID", sortable: false },
     { label: "Code Number", sortable: false },
-    { label: "Min Range", sortable: false },
-    { label: "Max Range", sortable: false },
     { label: "Supplier", column: "name" },
     { label: "Email", column: "email" },
     { label: "Phone", sortable: false },

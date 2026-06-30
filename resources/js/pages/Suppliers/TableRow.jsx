@@ -11,12 +11,6 @@ export default function TableRow({ item, codeNumberSettings }) {
         <Text fz="sm">{item.code_number ?? "—"}</Text>
       </Table.Td>
       <Table.Td>
-        <Text fz="sm">{codeNumberSettings?.min_range ?? "—"}</Text>
-      </Table.Td>
-      <Table.Td>
-        <Text fz="sm">{codeNumberSettings?.max_range ?? "—"}</Text>
-      </Table.Td>
-      <Table.Td>
         <Text fz="sm" fw={500}>{item.name}</Text>
       </Table.Td>
       <Table.Td>
