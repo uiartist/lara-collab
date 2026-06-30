@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Supplier\StoreSupplierRequest;
 use App\Http\Requests\Supplier\UpdateSupplierRequest;
-use App\Http\Resources\Supplier\SupplierResource;
 use App\Http\Resources\EntityCodeNumber\EntityCodeNumberResource;
+use App\Http\Resources\Supplier\SupplierResource;
 use App\Models\EntityCodeNumber;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -66,6 +66,7 @@ class SupplierController extends Controller
             ->pluck('code_number')
             ->map(function ($code) use ($prefix) {
                 $numeric = preg_replace('/^'.preg_quote($prefix, '/').'/', '', $code);
+
                 return preg_match('/^\d+$/', $numeric) ? (int) $numeric : null;
             })
             ->filter()
