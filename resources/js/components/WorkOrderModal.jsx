@@ -234,6 +234,7 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
   const { auth } = usePage().props;
 
   const [suppliers, setSuppliers] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [suppliersLoaded, setSuppliersLoaded] = useState(false);
   const [form, setForm] = useState(() => createInitialForm(auth, task));
   const [errors, setErrors] = useState({});
@@ -244,7 +245,9 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
       axios
         .get(route('purchase-requests.suppliers'))
         .then(({ data }) => {
-          setSuppliers(data.map((s) => ({ value: String(s.id), label: s.name })));
+          const supplierOptions = data.map((s) => ({ value: String(s.id), label: s.name }));
+          setSuppliers(supplierOptions);
+          setCustomers(supplierOptions);
           setSuppliersLoaded(true);
         })
         .catch(() =>
@@ -413,7 +416,7 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
               <TextInput label="Work Order Date" type="date" value={form.work_order_date} onChange={(e) => updateField('work_order_date', e.target.value)} error={errors.work_order_date} />
               <Select label="Priority Level" placeholder="Select priority" data={['Low', 'Normal', 'High', 'Urgent']} value={form.priority_level} onChange={(val) => updateField('priority_level', val ?? '')} error={errors.priority_level} clearable />
               <TextInput label="Requested By" value={form.requested_by} onChange={(e) => updateField('requested_by', e.target.value)} error={errors.requested_by} />
-              <TextInput label="Customer ID" value={form.customer_id} onChange={(e) => updateField('customer_id', e.target.value)} error={errors.customer_id} />
+              <Select label="Customer" placeholder="Select customer" data={customers} value={form.customer_id} onChange={(val) => updateField('customer_id', val ?? '')} error={errors.customer_id} searchable />
               <TextInput label="Department" value={form.department} onChange={(e) => updateField('department', e.target.value)} error={errors.department} />
             </SimpleGrid>
           </Stack>
