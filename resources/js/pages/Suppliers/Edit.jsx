@@ -12,8 +12,37 @@ const statusOptions = ["Active", "Inactive", "Blacklisted"];
 const gstRegistrationTypeOptions = ["Regular", "Composition", "Exempt", "Unregistered"];
 const currencyOptions = ["INR", "USD", "EUR", "GBP", "AED"];
 
+const buildCountryOptions = (countries = []) => {
+  const source = Array.isArray(countries) ? countries : Object.values(countries ?? {});
+
+  const normalizedCountries = source
+    .map((country) => {
+      if (typeof country === "string") {
+        return { value: country, label: country };
+      }
+
+      if (country && typeof country === "object") {
+        const value = country.value ?? country.id ?? country.name ?? country.label;
+        const label = country.label ?? country.name ?? country.value ?? country.id;
+
+        if (!value || !label) {
+          return null;
+        }
+
+        return { value: String(value), label: String(label) };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+  return [{ value: "India", label: "India" }, ...normalizedCountries];
+};
+
 const SupplierEdit = () => {
   const { item, countries = [] } = usePage().props;
+  const countryOptions = buildCountryOptions(countries);
+  const initialCountry = (item.country && String(item.country).trim()) ? String(item.country).trim() : "India";
 
   const [form, submit, updateValue] = useForm("put", route("suppliers.update", item.id), {
     code_number: item.code_number ?? "",
@@ -38,7 +67,7 @@ const SupplierEdit = () => {
     dispatch_address: item.dispatch_address ?? "",
     city: item.city ?? "",
     state: item.state ?? "",
-    country: item.country ?? "India",
+    country: initialCountry,
     postal_code: item.postal_code ?? "",
     gst_number: item.gst_number ?? "",
     pan_number: item.pan_number ?? "",
@@ -67,7 +96,8 @@ const SupplierEdit = () => {
     tax_id_2: item.tax_id_2 ?? "",
   });
 
-  const isIndianSupplier = (form.data.country ?? "").toLowerCase() === "india";
+  const normalizedCountry = String(form.data.country ?? "").trim().toLowerCase();
+  const isIndianSupplier = normalizedCountry === "india";
 
   return (
     <>
@@ -110,9 +140,6 @@ const SupplierEdit = () => {
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Select label="Status" placeholder="Select status" data={statusOptions} value={form.data.status} onChange={(value) => updateValue("status", value ?? "Active")} error={form.errors.status} />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Select label="GST Registration Type" placeholder="Select GST type" data={gstRegistrationTypeOptions} value={form.data.gst_registration_type} onChange={(value) => updateValue("gst_registration_type", value ?? "")} error={form.errors.gst_registration_type} />
             </Grid.Col>
 
             <Grid.Col span={12}>
@@ -162,12 +189,13 @@ const SupplierEdit = () => {
               <Select
                 label="Country"
                 placeholder="Select country"
-                data={countries}
+                data={countryOptions}
                 value={form.data.country}
-                onChange={(value) => updateValue("country", value ?? "")}
+                onChange={(value) => updateValue("country", value ?? "India")}
                 error={form.errors.country}
                 searchable
-                clearable
+                required
+                clearable={false}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -179,6 +207,9 @@ const SupplierEdit = () => {
             </Grid.Col>
             {isIndianSupplier ? (
               <>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <Select label="GST Registration Type" placeholder="Select GST type" data={gstRegistrationTypeOptions} value={form.data.gst_registration_type} onChange={(value) => updateValue("gst_registration_type", value ?? "")} error={form.errors.gst_registration_type} />
+                </Grid.Col>
                 <Grid.Col span={{ base: 12, md: 6 }}>
                   <TextInput label="GST Number" placeholder="GST number" value={form.data.gst_number} onChange={(e) => updateValue("gst_number", e.target.value)} error={form.errors.gst_number} />
                 </Grid.Col>

@@ -36,7 +36,7 @@ class StoreSupplierRequest extends FormRequest
             'dispatch_address' => ['nullable', 'string', 'max:500'],
             'city' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
-            'country' => ['nullable', 'string', 'max:100'],
+            'country' => ['required', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'gst_number' => ['nullable', 'string', 'max:50'],
             'pan_number' => ['nullable', 'string', 'max:50'],

@@ -29,7 +29,7 @@ class PurchaseRequestController extends Controller
             'requested_by' => ['nullable', 'string', 'max:255'],
             'customer_id' => ['nullable', 'string', 'max:255'],
             'department' => ['nullable', 'string', 'max:255'],
-            'country' => ['nullable', 'string', 'max:255'],
+            'country' => ['required', 'string', 'max:255'],
             'work_assigned_to' => ['nullable', 'string', 'max:255'],
             'expected_start_date' => ['nullable', 'date'],
             'expected_finish_date' => ['nullable', 'date'],

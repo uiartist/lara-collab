@@ -323,6 +323,7 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
     const e = {};
     if (!form.supplier_id) e.supplier_id = 'Please select a supplier.';
     if (!form.subject.trim()) e.subject = 'Subject is required.';
+    if (!String(form.country ?? '').trim()) e.country = 'Please select a country.';
     if (!form.selected_task_ids.length) e.selected_task_ids = 'Select at least one related task.';
     return e;
   };
@@ -492,7 +493,8 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
               onChange={(val) => updateField('country', val ?? '')}
               error={errors.country}
               searchable
-              clearable
+              required
+              clearable={false}
             />
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
               <Stack gap="sm">
