@@ -4,6 +4,7 @@ import useForm from "@/hooks/useForm";
 import ContainerBox from "@/layouts/ContainerBox";
 import Layout from "@/layouts/MainLayout";
 import { redirectTo } from "@/utils/route";
+import { usePage } from "@inertiajs/react";
 import { Anchor, Breadcrumbs, Checkbox, Grid, Group, NumberInput, Select, TextInput, Textarea, Title } from "@mantine/core";
 
 const supplierTypeOptions = ["Contractor", "Material Supplier", "Equipment Vendor", "Service Provider"];
@@ -12,6 +13,8 @@ const gstRegistrationTypeOptions = ["Regular", "Composition", "Exempt", "Unregis
 const currencyOptions = ["INR", "USD", "EUR", "GBP", "AED"];
 
 const SupplierCreate = () => {
+  const { countries = [] } = usePage().props;
+
   const [form, submit, updateValue] = useForm("post", route("suppliers.store"), {
     code_number: "",
     vendor_code: "",
@@ -35,7 +38,7 @@ const SupplierCreate = () => {
     dispatch_address: "",
     city: "",
     state: "",
-    country: "",
+    country: "India",
     postal_code: "",
     gst_number: "",
     pan_number: "",
@@ -60,7 +63,11 @@ const SupplierCreate = () => {
     payment_terms: "",
     credit_limit: "",
     currency: "",
+    tax_id_1: "",
+    tax_id_2: "",
   });
+
+  const isIndianSupplier = (form.data.country ?? "").toLowerCase() === "india";
 
   return (
     <>
@@ -152,7 +159,16 @@ const SupplierCreate = () => {
               <TextInput label="State" placeholder="State" value={form.data.state} onChange={(e) => updateValue("state", e.target.value)} error={form.errors.state} />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="Country" placeholder="Country" value={form.data.country} onChange={(e) => updateValue("country", e.target.value)} error={form.errors.country} />
+              <Select
+                label="Country"
+                placeholder="Select country"
+                data={countries}
+                value={form.data.country}
+                onChange={(value) => updateValue("country", value ?? "")}
+                error={form.errors.country}
+                searchable
+                clearable
+              />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput label="Postal Code" placeholder="Postal code" value={form.data.postal_code} onChange={(e) => updateValue("postal_code", e.target.value)} error={form.errors.postal_code} />
@@ -161,15 +177,28 @@ const SupplierCreate = () => {
             <Grid.Col span={12}>
               <Title order={3}>Tax & compliance</Title>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="GST Number" placeholder="GST number" value={form.data.gst_number} onChange={(e) => updateValue("gst_number", e.target.value)} error={form.errors.gst_number} />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="PAN Number" placeholder="PAN number" value={form.data.pan_number} onChange={(e) => updateValue("pan_number", e.target.value)} error={form.errors.pan_number} />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="TAN Number" placeholder="TAN number" value={form.data.tan_number} onChange={(e) => updateValue("tan_number", e.target.value)} error={form.errors.tan_number} />
-            </Grid.Col>
+            {isIndianSupplier ? (
+              <>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <TextInput label="GST Number" placeholder="GST number" value={form.data.gst_number} onChange={(e) => updateValue("gst_number", e.target.value)} error={form.errors.gst_number} />
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <TextInput label="PAN Number" placeholder="PAN number" value={form.data.pan_number} onChange={(e) => updateValue("pan_number", e.target.value)} error={form.errors.pan_number} />
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <TextInput label="TAN Number" placeholder="TAN number" value={form.data.tan_number} onChange={(e) => updateValue("tan_number", e.target.value)} error={form.errors.tan_number} />
+                </Grid.Col>
+              </>
+            ) : (
+              <>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <TextInput label="Tax ID 1" placeholder="Tax ID 1" value={form.data.tax_id_1} onChange={(e) => updateValue("tax_id_1", e.target.value)} error={form.errors.tax_id_1} />
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                  <TextInput label="Tax ID 2" placeholder="Tax ID 2" value={form.data.tax_id_2} onChange={(e) => updateValue("tax_id_2", e.target.value)} error={form.errors.tax_id_2} />
+                </Grid.Col>
+              </>
+            )}
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput label="MSME Registration Number" placeholder="MSME number" value={form.data.msme_registration_number} onChange={(e) => updateValue("msme_registration_number", e.target.value)} error={form.errors.msme_registration_number} />
             </Grid.Col>

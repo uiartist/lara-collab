@@ -38,6 +38,8 @@ class SupplierResource extends JsonResource
             'gst_number' => $this->gst_number,
             'pan_number' => $this->pan_number,
             'tan_number' => $this->tan_number,
+            'tax_id_1' => $this->tax_id_1,
+            'tax_id_2' => $this->tax_id_2,
             'msme_registration_number' => $this->msme_registration_number,
             'cin_number' => $this->cin_number,
             'trade_license_number' => $this->trade_license_number,

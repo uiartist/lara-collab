@@ -20,6 +20,7 @@ class PurchaseRequest extends Model
         'requested_by',
         'customer_id',
         'department',
+        'country',
         'work_assigned_to',
         'expected_start_date',
         'expected_finish_date',

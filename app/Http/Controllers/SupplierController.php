@@ -6,6 +6,7 @@ use App\Http\Requests\Supplier\StoreSupplierRequest;
 use App\Http\Requests\Supplier\UpdateSupplierRequest;
 use App\Http\Resources\EntityCodeNumber\EntityCodeNumberResource;
 use App\Http\Resources\Supplier\SupplierResource;
+use App\Models\Country;
 use App\Models\EntityCodeNumber;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -35,7 +36,9 @@ class SupplierController extends Controller
     {
         $this->authorize('create', Supplier::class);
 
-        return Inertia::render('Suppliers/Create');
+        return Inertia::render('Suppliers/Create', [
+            'countries' => Country::dropdownValues(),
+        ]);
     }
 
     public function store(StoreSupplierRequest $request)
@@ -85,7 +88,10 @@ class SupplierController extends Controller
     {
         $this->authorize('update', $supplier);
 
-        return Inertia::render('Suppliers/Edit', ['item' => new SupplierResource($supplier)]);
+        return Inertia::render('Suppliers/Edit', [
+            'item' => new SupplierResource($supplier),
+            'countries' => Country::dropdownValues(),
+        ]);
     }
 
     public function update(Supplier $supplier, UpdateSupplierRequest $request)

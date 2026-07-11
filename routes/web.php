@@ -132,6 +132,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Purchase Requests
     Route::get('purchase-requests/suppliers', [PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');
+    Route::get('purchase-requests/departments', [PurchaseRequestController::class, 'departments'])->name('purchase-requests.departments');
+    Route::get('purchase-requests/countries', [PurchaseRequestController::class, 'countries'])->name('purchase-requests.countries');
     Route::post('tasks/{task}/purchase-requests', [PurchaseRequestController::class, 'store'])->name('tasks.purchase-requests.store');
 
     // Invoices

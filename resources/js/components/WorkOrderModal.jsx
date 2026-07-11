@@ -28,6 +28,24 @@ const getLevelLabel = (depth) => LEVEL_LABELS[depth] ?? `Level ${depth + 1}`;
 const LEVEL_COLORS = ['blue', 'teal', 'violet', 'orange', 'pink'];
 const getLevelColor = (depth) => LEVEL_COLORS[depth] ?? 'gray';
 
+const DEPARTMENT_OPTIONS = [
+  'Planning & Design',
+  'Project Management',
+  'Site Operations',
+  'Civil Engineering',
+  'Structural Engineering',
+  'MEP',
+  'Quality Assurance',
+  'Safety & Compliance',
+  'Procurement',
+  'Logistics',
+  'Finance',
+  'HR & Admin',
+  'IT & Digital',
+  'Warehouse',
+  'Customer Support',
+];
+
 const WORK_ORDER_FIELDS = [
   'work_order_number',
   'work_order_date',
@@ -35,6 +53,7 @@ const WORK_ORDER_FIELDS = [
   'requested_by',
   'customer_id',
   'department',
+  'country',
   'work_assigned_to',
   'expected_start_date',
   'expected_finish_date',
@@ -70,6 +89,7 @@ const createInitialForm = (auth, task) => ({
   requested_by: auth?.user?.name ?? '',
   customer_id: '',
   department: '',
+  country: '',
   work_assigned_to: '',
   expected_start_date: '',
   expected_finish_date: '',
@@ -235,6 +255,8 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
 
   const [suppliers, setSuppliers] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [suppliersLoaded, setSuppliersLoaded] = useState(false);
   const [form, setForm] = useState(() => createInitialForm(auth, task));
   const [errors, setErrors] = useState({});
@@ -242,16 +264,24 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
 
   useEffect(() => {
     if (opened && !suppliersLoaded) {
-      axios
-        .get(route('purchase-requests.suppliers'))
-        .then(({ data }) => {
-          const supplierOptions = data.map((s) => ({ value: String(s.id), label: s.name }));
+      Promise.all([
+        axios.get(route('purchase-requests.suppliers')),
+        axios.get(route('purchase-requests.departments')),
+        axios.get(route('purchase-requests.countries')),
+      ])
+        .then(([suppliersResponse, departmentsResponse, countriesResponse]) => {
+          const supplierOptions = suppliersResponse.data.map((s) => ({ value: String(s.id), label: s.name }));
+          const departmentOptions = departmentsResponse.data.map((department) => ({ value: department.name, label: department.name }));
+          const countryOptions = countriesResponse.data.map((country) => ({ value: country.label, label: country.label }));
+
           setSuppliers(supplierOptions);
           setCustomers(supplierOptions);
+          setDepartments(departmentOptions);
+          setCountries(countryOptions);
           setSuppliersLoaded(true);
         })
         .catch(() =>
-          showNotification({ title: 'Error', message: 'Failed to load suppliers', color: 'red' })
+          showNotification({ title: 'Error', message: 'Failed to load work order dropdown data', color: 'red' })
         );
     }
   }, [opened, suppliersLoaded]);
@@ -360,6 +390,9 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
     onClose();
   };
 
+  const selectedCountryLabel = (form.country ?? '').toLowerCase();
+  const showShipToSection = !selectedCountryLabel || selectedCountryLabel !== 'india';
+
   return (
     <Modal
       opened={opened}
@@ -417,7 +450,16 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
               <Select label="Priority Level" placeholder="Select priority" data={['Low', 'Normal', 'High', 'Urgent']} value={form.priority_level} onChange={(val) => updateField('priority_level', val ?? '')} error={errors.priority_level} clearable />
               <TextInput label="Requested By" value={form.requested_by} onChange={(e) => updateField('requested_by', e.target.value)} error={errors.requested_by} />
               <Select label="Customer" placeholder="Select customer" data={customers} value={form.customer_id} onChange={(val) => updateField('customer_id', val ?? '')} error={errors.customer_id} searchable />
-              <TextInput label="Department" value={form.department} onChange={(e) => updateField('department', e.target.value)} error={errors.department} />
+              <Select
+                label="Department"
+                placeholder="Select department"
+                data={departments.length ? departments : DEPARTMENT_OPTIONS.map((option) => ({ value: option, label: option }))}
+                value={form.department}
+                onChange={(val) => updateField('department', val ?? '')}
+                error={errors.department}
+                searchable
+                clearable
+              />
             </SimpleGrid>
           </Stack>
 
@@ -440,25 +482,40 @@ export default function WorkOrderModal({ opened, onClose, projectId, task }) {
             rows={3}
           />
 
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm">Bill To</Text>
-              <TextInput label="Name" value={form.bill_to_name} onChange={(e) => updateField('bill_to_name', e.target.value)} error={errors.bill_to_name} />
-              <TextInput label="Company" value={form.bill_to_company} onChange={(e) => updateField('bill_to_company', e.target.value)} error={errors.bill_to_company} />
-              <TextInput label="Street Address" value={form.bill_to_street_address} onChange={(e) => updateField('bill_to_street_address', e.target.value)} error={errors.bill_to_street_address} />
-              <TextInput label="City, State, Zip" value={form.bill_to_city_state_zip} onChange={(e) => updateField('bill_to_city_state_zip', e.target.value)} error={errors.bill_to_city_state_zip} />
-              <TextInput label="Phone" value={form.bill_to_phone} onChange={(e) => updateField('bill_to_phone', e.target.value)} error={errors.bill_to_phone} />
-            </Stack>
+          <Stack gap="sm">
+            <Text fw={600} size="sm">Billing Address</Text>
+            <Select
+              label="Country"
+              placeholder="Select country"
+              data={countries}
+              value={form.country}
+              onChange={(val) => updateField('country', val ?? '')}
+              error={errors.country}
+              searchable
+              clearable
+            />
+            <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm">Bill To</Text>
+                <TextInput label="Name" value={form.bill_to_name} onChange={(e) => updateField('bill_to_name', e.target.value)} error={errors.bill_to_name} />
+                <TextInput label="Company" value={form.bill_to_company} onChange={(e) => updateField('bill_to_company', e.target.value)} error={errors.bill_to_company} />
+                <TextInput label="Street Address" value={form.bill_to_street_address} onChange={(e) => updateField('bill_to_street_address', e.target.value)} error={errors.bill_to_street_address} />
+                <TextInput label="City, State, Zip" value={form.bill_to_city_state_zip} onChange={(e) => updateField('bill_to_city_state_zip', e.target.value)} error={errors.bill_to_city_state_zip} />
+                <TextInput label="Phone" value={form.bill_to_phone} onChange={(e) => updateField('bill_to_phone', e.target.value)} error={errors.bill_to_phone} />
+              </Stack>
 
-            <Stack gap="sm">
-              <Text fw={600} size="sm">Ship To</Text>
-              <TextInput label="Name" value={form.ship_to_name} onChange={(e) => updateField('ship_to_name', e.target.value)} error={errors.ship_to_name} />
-              <TextInput label="Company" value={form.ship_to_company} onChange={(e) => updateField('ship_to_company', e.target.value)} error={errors.ship_to_company} />
-              <TextInput label="Street Address" value={form.ship_to_street_address} onChange={(e) => updateField('ship_to_street_address', e.target.value)} error={errors.ship_to_street_address} />
-              <TextInput label="City, State, Zip" value={form.ship_to_city_state_zip} onChange={(e) => updateField('ship_to_city_state_zip', e.target.value)} error={errors.ship_to_city_state_zip} />
-              <TextInput label="Phone" value={form.ship_to_phone} onChange={(e) => updateField('ship_to_phone', e.target.value)} error={errors.ship_to_phone} />
-            </Stack>
-          </SimpleGrid>
+              {showShipToSection && (
+                <Stack gap="sm">
+                  <Text fw={600} size="sm">Ship To</Text>
+                  <TextInput label="Name" value={form.ship_to_name} onChange={(e) => updateField('ship_to_name', e.target.value)} error={errors.ship_to_name} />
+                  <TextInput label="Company" value={form.ship_to_company} onChange={(e) => updateField('ship_to_company', e.target.value)} error={errors.ship_to_company} />
+                  <TextInput label="Street Address" value={form.ship_to_street_address} onChange={(e) => updateField('ship_to_street_address', e.target.value)} error={errors.ship_to_street_address} />
+                  <TextInput label="City, State, Zip" value={form.ship_to_city_state_zip} onChange={(e) => updateField('ship_to_city_state_zip', e.target.value)} error={errors.ship_to_city_state_zip} />
+                  <TextInput label="Phone" value={form.ship_to_phone} onChange={(e) => updateField('ship_to_phone', e.target.value)} error={errors.ship_to_phone} />
+                </Stack>
+              )}
+            </SimpleGrid>
+          </Stack>
 
           <Stack gap="sm">
             <Group justify="space-between" align="center">

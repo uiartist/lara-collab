@@ -41,6 +41,8 @@ class Supplier extends Model
         'gst_number',
         'pan_number',
         'tan_number',
+        'tax_id_1',
+        'tax_id_2',
         'msme_registration_number',
         'cin_number',
         'trade_license_number',

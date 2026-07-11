@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PurchaseRequestMail;
+use App\Models\Country;
+use App\Models\Department;
 use App\Models\PurchaseRequest;
 use App\Models\Supplier;
 use App\Models\Task;
@@ -27,6 +29,7 @@ class PurchaseRequestController extends Controller
             'requested_by' => ['nullable', 'string', 'max:255'],
             'customer_id' => ['nullable', 'string', 'max:255'],
             'department' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
             'work_assigned_to' => ['nullable', 'string', 'max:255'],
             'expected_start_date' => ['nullable', 'date'],
             'expected_finish_date' => ['nullable', 'date'],
@@ -84,6 +87,7 @@ class PurchaseRequestController extends Controller
                 'requested_by' => $validated['requested_by'] ?? null,
                 'customer_id' => $validated['customer_id'] ?? null,
                 'department' => $validated['department'] ?? null,
+                'country' => $validated['country'] ?? null,
                 'work_assigned_to' => $validated['work_assigned_to'] ?? null,
                 'expected_start_date' => $validated['expected_start_date'] ?? null,
                 'expected_finish_date' => $validated['expected_finish_date'] ?? null,
@@ -142,6 +146,22 @@ class PurchaseRequestController extends Controller
         return response()->json(
             Supplier::whereNull('archived_at')->orderBy('name')->get(['id', 'name', 'email'])
         );
+    }
+
+    public function departments(): JsonResponse
+    {
+        $this->authorize('create', PurchaseRequest::class);
+
+        return response()->json(
+            Department::orderBy('name')->get(['id', 'name'])
+        );
+    }
+
+    public function countries(): JsonResponse
+    {
+        $this->authorize('create', PurchaseRequest::class);
+
+        return response()->json(Country::dropdownValues());
     }
 
     private function decodeLineItems(?string $value, string $field): array

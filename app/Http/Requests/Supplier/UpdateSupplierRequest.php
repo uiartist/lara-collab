@@ -41,6 +41,8 @@ class UpdateSupplierRequest extends FormRequest
             'gst_number' => ['nullable', 'string', 'max:50'],
             'pan_number' => ['nullable', 'string', 'max:50'],
             'tan_number' => ['nullable', 'string', 'max:50'],
+            'tax_id_1' => ['nullable', 'string', 'max:50'],
+            'tax_id_2' => ['nullable', 'string', 'max:50'],
             'msme_registration_number' => ['nullable', 'string', 'max:100'],
             'cin_number' => ['nullable', 'string', 'max:100'],
             'trade_license_number' => ['nullable', 'string', 'max:100'],

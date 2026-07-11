@@ -21,12 +21,13 @@
     @endif
     <p><strong>Related Task:</strong> #{{ $purchaseRequest->task->number }} - {{ $purchaseRequest->task->name }}</p>
 
-    @if($purchaseRequest->requested_by || $purchaseRequest->customer_id || $purchaseRequest->department || $purchaseRequest->work_assigned_to || $purchaseRequest->expected_start_date || $purchaseRequest->expected_finish_date || $purchaseRequest->work_completed_by)
+    @if($purchaseRequest->requested_by || $purchaseRequest->customer_id || $purchaseRequest->department || $purchaseRequest->country || $purchaseRequest->work_assigned_to || $purchaseRequest->expected_start_date || $purchaseRequest->expected_finish_date || $purchaseRequest->work_completed_by)
         <hr>
         <h3>Assignment</h3>
         @if($purchaseRequest->requested_by)<p><strong>Requested By:</strong> {{ $purchaseRequest->requested_by }}</p>@endif
         @if($purchaseRequest->customer_id)<p><strong>Customer ID:</strong> {{ $purchaseRequest->customer_id }}</p>@endif
         @if($purchaseRequest->department)<p><strong>Department:</strong> {{ $purchaseRequest->department }}</p>@endif
+        @if($purchaseRequest->country)<p><strong>Country:</strong> {{ $purchaseRequest->country }}</p>@endif
         @if($purchaseRequest->work_assigned_to)<p><strong>Work Assigned To:</strong> {{ $purchaseRequest->work_assigned_to }}</p>@endif
         @if($purchaseRequest->expected_start_date)<p><strong>Expected Start:</strong> {{ $purchaseRequest->expected_start_date->toDateString() }}</p>@endif
         @if($purchaseRequest->expected_finish_date)<p><strong>Expected Finish:</strong> {{ $purchaseRequest->expected_finish_date->toDateString() }}</p>@endif
