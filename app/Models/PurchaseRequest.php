@@ -5,9 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LaravelArchivable\Archivable;
+use Lacodix\LaravelModelFilter\Traits\IsSearchable;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 
 class PurchaseRequest extends Model
 {
+    use Archivable, IsSearchable, IsSortable;
+
+    protected $searchable = [
+        'work_order_number',
+        'subject',
+    ];
+
+    protected $sortable = [
+        'work_order_number' => 'asc',
+        'subject',
+        'created_at',
+    ];
     protected $fillable = [
         'code_number',
         'task_id',

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DropdownValuesController;
 use App\Http\Controllers\Invoice\InvoiceTasksController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MyWork\ActivityController;
 use App\Http\Controllers\MyWork\MyWorkTaskController;
 use App\Http\Controllers\ProjectController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\Task\TaskCostController;
 use App\Http\Controllers\Task\TimeLogController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'dashboard');
@@ -129,6 +131,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Suppliers
     Route::resource('suppliers', SupplierController::class)->except(['show']);
     Route::post('suppliers/{supplierId}/restore', [SupplierController::class, 'restore'])->name('suppliers.restore');
+
+    // Materials
+    Route::resource('materials', MaterialController::class)->except(['show']);
+    Route::post('materials/{materialId}/restore', [MaterialController::class, 'restore'])->name('materials.restore');
+
+    // Work Orders
+    Route::get('work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+Route::delete('work-orders/{purchaseRequest}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
+Route::post('work-orders/{purchaseRequest}/restore', [WorkOrderController::class, 'restore'])->name('work-orders.restore');
 
     // Purchase Requests
     Route::get('purchase-requests/suppliers', [PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');

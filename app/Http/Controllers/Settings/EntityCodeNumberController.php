@@ -36,6 +36,7 @@ class EntityCodeNumberController extends Controller
             'ClientCompany' => 'Client Company',
             'Supplier' => 'Supplier',
             'PurchaseRequest' => 'Purchase Request',
+            'WorkOrder' => 'Work Order',
             'OwnerCompany' => 'Owner Company',
             'Development' => 'Development',
         ];
@@ -60,6 +61,7 @@ class EntityCodeNumberController extends Controller
             'ClientCompany' => 'Client Company',
             'Supplier' => 'Supplier',
             'PurchaseRequest' => 'Purchase Request',
+            'WorkOrder' => 'Work Order',
             'OwnerCompany' => 'Owner Company',
             'Development' => 'Development',
         ];

@@ -20,30 +20,37 @@ const useNavigationStore = create((set) => ({
   },
   active: (label, isSubItem) => {
     return set(produce(state => {
-      state.items.forEach(item => {
+      const processItem = (item) => {
         const hasLinks = Array.isArray(item.links);
+        let itemHasActive = false;
 
         if (hasLinks) {
-          let hasActive = false;
-
-          item.links.forEach(subItem => {
-            if (subItem.label === label && isSubItem) {
-              subItem.active = true;
-              hasActive = true;
-            } else {
-              subItem.active = false;
+          item.links.forEach((child) => {
+            const childActive = processItem(child);
+            if (childActive) {
+              itemHasActive = true;
             }
           });
 
-          item.active = hasActive;
-          item.opened = hasActive;
+          item.active = itemHasActive;
+          item.opened = itemHasActive;
         } else {
-          if (item.label === label && !isSubItem) {
+          if (item.label === label && isSubItem) {
             item.active = true;
+            itemHasActive = true;
+          } else if (item.label === label && !isSubItem) {
+            item.active = true;
+            itemHasActive = true;
           } else {
             item.active = false;
           }
         }
+
+        return itemHasActive;
+      };
+
+      state.items.forEach((item) => {
+        processItem(item);
       });
     }));
   },

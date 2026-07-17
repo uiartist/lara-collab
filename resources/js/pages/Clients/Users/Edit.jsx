@@ -15,28 +15,92 @@ import {
   Grid,
   Group,
   MultiSelect,
+  NumberInput,
   PasswordInput,
+  Select,
   Text,
   TextInput,
+  Textarea,
   Title,
 } from "@mantine/core";
+
+const customerTypeOptions = ["Corporate", "Individual", "Government", "SME", "Partner"];
+const statusOptions = ["Active", "Inactive", "On Hold"];
+
+const buildCountryOptions = (countries = []) => {
+  const source = Array.isArray(countries) ? countries : Object.values(countries ?? {});
+
+  const normalizedCountries = source
+    .map((country) => {
+      if (typeof country === "string") {
+        return { value: country, label: country };
+      }
+
+      if (country && typeof country === "object") {
+        const value = country.value ?? country.id ?? country.name ?? country.label;
+        const label = country.label ?? country.name ?? country.value ?? country.id;
+
+        if (!value || !label) {
+          return null;
+        }
+
+        return { value: String(label), label: String(label) };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+  const options = [{ value: "India", label: "India" }];
+  const seen = new Set(["india"]);
+
+  normalizedCountries.forEach((country) => {
+    const value = String(country.value ?? "").trim();
+    const normalizedValue = value.toLowerCase();
+
+    if (!value || seen.has(normalizedValue)) {
+      return;
+    }
+
+    seen.add(normalizedValue);
+    options.push({ value, label: country.label ?? value });
+  });
+
+  return options;
+};
 
 const ClientEdit = () => {
   const {
     item,
-    dropdowns: { companies },
+    dropdowns: { companies, countries = [] },
   } = usePage().props;
+  const countryOptions = buildCountryOptions(countries);
 
   const [form, submit, updateValue] = useForm("post", route("clients.users.update", item.id), {
     _method: "put",
     avatar: null,
     name: item.name,
     phone: item.phone || "",
+    customer_type: item.customer_type || "",
+    status: item.status || "Active",
+    designation: item.designation || "",
+    mobile_number: item.mobile_number || "",
     email: item.email,
+    website: item.website || "",
+    country: item.country || "India",
+    gst_vat_number: item.gst_vat_number || "",
+    tax_id_1: item.tax_id_1 || "",
+    tax_id_2: item.tax_id_2 || "",
+    payment_terms: item.payment_terms || "",
+    credit_limit: item.credit_limit || "",
+    notes: item.notes || "",
     password: "",
     password_confirmation: "",
     companies: item.companies.map((i) => i.id.toString()),
   });
+
+  const normalizedCountry = String(form.data.country ?? "").trim().toLowerCase();
+  const isIndianClient = normalizedCountry === "india";
 
   return (
     <>
@@ -104,6 +168,126 @@ const ClientEdit = () => {
             value={form.data.phone}
             onChange={(e) => updateValue("phone", e.target.value)}
             error={form.errors.phone}
+          />
+
+          <Select
+            label="Customer Type"
+            placeholder="Select customer type"
+            mt="md"
+            data={customerTypeOptions}
+            value={form.data.customer_type}
+            onChange={(value) => updateValue("customer_type", value ?? "")}
+            error={form.errors.customer_type}
+            clearable
+          />
+
+          <Select
+            label="Status"
+            placeholder="Select status"
+            mt="md"
+            data={statusOptions}
+            value={form.data.status}
+            onChange={(value) => updateValue("status", value ?? "Active")}
+            error={form.errors.status}
+          />
+
+          <TextInput
+            label="Designation"
+            placeholder="Contact designation"
+            mt="md"
+            value={form.data.designation}
+            onChange={(e) => updateValue("designation", e.target.value)}
+            error={form.errors.designation}
+          />
+
+          <TextInput
+            label="Mobile Number"
+            placeholder="Contact mobile number"
+            mt="md"
+            value={form.data.mobile_number}
+            onChange={(e) => updateValue("mobile_number", e.target.value)}
+            error={form.errors.mobile_number}
+          />
+
+          <TextInput
+            label="Website"
+            placeholder="https://example.com"
+            mt="md"
+            value={form.data.website}
+            onChange={(e) => updateValue("website", e.target.value)}
+            error={form.errors.website}
+          />
+
+          <Select
+            label="Country"
+            placeholder="Select country"
+            mt="md"
+            data={countryOptions}
+            value={form.data.country}
+            onChange={(value) => updateValue("country", value ?? "India")}
+            error={form.errors.country}
+            searchable
+            clearable={false}
+          />
+
+          {isIndianClient ? (
+            <TextInput
+              label="GST / VAT Number"
+              placeholder="GST / VAT number"
+              mt="md"
+              value={form.data.gst_vat_number}
+              onChange={(e) => updateValue("gst_vat_number", e.target.value)}
+              error={form.errors.gst_vat_number}
+            />
+          ) : (
+            <>
+              <TextInput
+                label="Tax ID 1"
+                placeholder="Primary tax identifier"
+                mt="md"
+                value={form.data.tax_id_1}
+                onChange={(e) => updateValue("tax_id_1", e.target.value)}
+                error={form.errors.tax_id_1}
+              />
+              <TextInput
+                label="Tax ID 2"
+                placeholder="Secondary tax identifier"
+                mt="md"
+                value={form.data.tax_id_2}
+                onChange={(e) => updateValue("tax_id_2", e.target.value)}
+                error={form.errors.tax_id_2}
+              />
+            </>
+          )}
+
+          <TextInput
+            label="Payment Terms"
+            placeholder="Net 30"
+            mt="md"
+            value={form.data.payment_terms}
+            onChange={(e) => updateValue("payment_terms", e.target.value)}
+            error={form.errors.payment_terms}
+          />
+
+          <NumberInput
+            label="Credit Limit"
+            placeholder="50000"
+            mt="md"
+            value={form.data.credit_limit}
+            onChange={(value) => updateValue("credit_limit", value ?? "")}
+            min={0}
+            decimalScale={2}
+            error={form.errors.credit_limit}
+          />
+
+          <Textarea
+            label="Notes"
+            placeholder="Additional client notes"
+            mt="md"
+            rows={3}
+            value={form.data.notes}
+            onChange={(e) => updateValue("notes", e.target.value)}
+            error={form.errors.notes}
           />
 
           <MultiSelect

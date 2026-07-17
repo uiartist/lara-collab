@@ -17,6 +17,7 @@ class PermissionService
             'Owner Company' => ['view owner company', 'edit owner company'],
             'Client User' => ['view client users', 'create client user', 'edit client user', 'archive client user', 'restore client user'],
             'Client Company' => ['view client companies', 'create client company', 'edit client company', 'archive client company', 'restore client company'],
+            'Material' => ['view materials', 'create material', 'edit material', 'archive material', 'restore material', 'delete material'],
             'Project' => ['view projects', 'view project', 'create project', 'edit project', 'archive project', 'restore project', 'edit project user access'],
             'TaskGroups' => ['create task group', 'edit task group', 'archive task group', 'restore task group', 'reorder task group'],
             'Tasks' => [

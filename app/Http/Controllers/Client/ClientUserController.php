@@ -9,6 +9,7 @@ use App\Http\Requests\Client\StoreClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Http\Resources\Client\ClientResource;
 use App\Models\ClientCompany;
+use App\Models\Country;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,6 +40,7 @@ class ClientUserController extends Controller
         return Inertia::render('Clients/Users/Create', [
             'dropdowns' => [
                 'companies' => ClientCompany::dropdownValues(),
+                'countries' => Country::dropdownValues(),
             ],
         ]);
     }
@@ -66,6 +68,7 @@ class ClientUserController extends Controller
             'item' => new ClientResource($user),
             'dropdowns' => [
                 'companies' => ClientCompany::dropdownValues(),
+                'countries' => Country::dropdownValues(),
             ],
         ]);
     }

@@ -3,14 +3,12 @@ import useNavigationStore from "@/hooks/store/useNavigationStore";
 import { usePage } from "@inertiajs/react";
 import { Group, ScrollArea, Text, rem } from "@mantine/core";
 import {
-  IconBuildingSkyscraper,
   IconFileDollar,
   IconGauge,
   IconLayoutList,
   IconListDetails,
   IconReportAnalytics,
   IconSettings,
-  IconTruck,
   IconUsers,
 } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -32,11 +30,64 @@ export default function Sidebar() {
         visible: true,
       },
       {
-        label: "Projects",
-        icon: IconListDetails,
-        link: route("projects.index"),
-        active: route().current("projects.*"),
-        visible: can("view projects"),
+        label: "Master Data",
+        icon: IconLayoutList,
+        active: route().current("clients.*") || route().current("suppliers.*") || route().current("materials.*") || route().current("projects.*"),
+        opened: route().current("clients.*") || route().current("suppliers.*") || route().current("materials.*") || route().current("projects.*"),
+        visible: true,
+        links: [
+          {
+            label: "Clients",
+            link: route("clients.users.index"),
+            active: route().current("clients.*"),
+            visible: can("view client users") || can("view client companies"),
+          },
+          {
+            label: "Suppliers",
+            link: route("suppliers.index"),
+            active: route().current("suppliers.*"),
+            visible: can("view suppliers"),
+          },
+          {
+            label: "Materials",
+            link: route("materials.index"),
+            active: route().current("materials.*"),
+            visible: true,
+          },
+          {
+            label: "Projects",
+            icon: IconListDetails,
+            active: route().current("projects.*") || route().current("invoices.*") || route().current("reports.*"),
+            opened: route().current("projects.*") || route().current("invoices.*") || route().current("reports.*"),
+            visible: can("view projects") || can("view invoices") || can("view logged time sum report") || can("view daily logged time report") || can("view fixed price sum report"),
+            links: [
+              {
+                label: "List",
+                link: route("projects.index"),
+                active: route().current("projects.index"),
+                visible: can("view projects"),
+              },
+              {
+                label: "Work Orders",
+                link: route("work-orders.index"),
+                active: route().current("work-orders"),
+                visible: can("view projects"),
+              },
+              {
+                label: "Invoices",
+                link: route("invoices.index"),
+                active: route().current("invoices.*"),
+                visible: can("view invoices"),
+              },
+              {
+                label: "Reports",
+                link: route("reports.logged-time.sum"),
+                active: route().current("reports.*"),
+                visible: can("view logged time sum report") || can("view daily logged time report") || can("view fixed price sum report"),
+              },
+            ],
+          },
+        ],
       },
       {
         label: "My Work",
@@ -60,75 +111,6 @@ export default function Sidebar() {
         ],
       },
       {
-        label: "Clients",
-        icon: IconBuildingSkyscraper,
-        active: route().current("clients.*"),
-        opened: route().current("clients.*"),
-        visible: can("view client users") || can("view client companies"),
-        links: [
-          {
-            label: "Users",
-            link: route("clients.users.index"),
-            active: route().current("clients.users.*"),
-            visible: can("view client users"),
-          },
-          {
-            label: "Companies",
-            link: route("clients.companies.index"),
-            active: route().current("clients.companies.*"),
-            visible: can("view client companies"),
-          },
-        ],
-      },
-      {
-        label: "Users",
-        icon: IconUsers,
-        link: route("users.index"),
-        active: route().current("users.*"),
-        visible: can("view users"),
-      },
-      {
-        label: "Suppliers",
-        icon: IconTruck,
-        link: route("suppliers.index"),
-        active: route().current("suppliers.*"),
-        visible: can("view suppliers"),
-      },
-      {
-        label: "Invoices",
-        icon: IconFileDollar,
-        link: route("invoices.index"),
-        active: route().current("invoices.*"),
-        visible: can("view invoices"),
-      },
-      {
-        label: "Reports",
-        icon: IconReportAnalytics,
-        active: route().current("reports.*"),
-        opened: route().current("reports.*"),
-        visible: can("view logged time sum report") || can("view daily logged time report") || can("view fixed price sum report"),
-        links: [
-          {
-            label: "Logged time sum",
-            link: route("reports.logged-time.sum"),
-            active: route().current("reports.logged-time.sum"),
-            visible: can("view logged time sum report"),
-          },
-          {
-            label: "Daily logged time",
-            link: route("reports.logged-time.daily"),
-            active: route().current("reports.logged-time.daily"),
-            visible: can("view daily logged time report"),
-          },
-          {
-            label: "Fixed price sum",
-            link: route("reports.fixed-price.sum"),
-            active: route().current("reports.fixed-price.sum"),
-            visible: can("view fixed price sum report"),
-          },
-        ],
-      },
-      {
         label: "Settings",
         icon: IconSettings,
         active: route().current("settings.*"),
@@ -140,6 +122,12 @@ export default function Sidebar() {
             link: route("settings.company.edit"),
             active: route().current("settings.company.*"),
             visible: can("view owner company"),
+          },
+          {
+            label: "Users",
+            link: route("users.index"),
+            active: route().current("users.*"),
+            visible: can("view users"),
           },
           {
             label: "Roles",
