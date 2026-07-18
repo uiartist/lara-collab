@@ -30,6 +30,7 @@ class Project extends Model implements AuditableContract
 
     protected $searchable = [
         'name',
+        'code_number',
     ];
 
     protected $observables = [

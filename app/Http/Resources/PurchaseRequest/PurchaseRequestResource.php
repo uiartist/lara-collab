@@ -10,7 +10,7 @@ class PurchaseRequestResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'number' => $this->work_order_number,
+            'number' => $this->code_number,
             'title' => $this->subject,
             'subject' => $this->subject,
             'supplier' => $this->supplier ? $this->supplier->name : 'N/A',

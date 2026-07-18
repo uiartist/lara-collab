@@ -28,6 +28,12 @@ export default function ProjectCard({ item }) {
           {item.client_company?.name}
         </Text>
 
+        {item.code_number && (
+          <Text fz="sm" c="dimmed" mt="sm">
+            Code: <Text span fw={500}>{item.code_number}</Text>
+          </Text>
+        )}
+
         {item.description?.length > 0 && (
           <Text fz="sm" c="dimmed" mt="lg">
             {item.description}

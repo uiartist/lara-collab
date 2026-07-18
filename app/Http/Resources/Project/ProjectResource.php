@@ -20,6 +20,7 @@ class ProjectResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'favorite' => $this->favorite,
+            'code_number' => $this->code_number,
             'client_company' => $this->clientCompany->only(['id', 'name']),
             'users_with_access' => PermissionService::usersWithAccessToProject($this),
             'all_tasks_count' => $this->all_tasks_count,

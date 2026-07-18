@@ -15,7 +15,7 @@ const WorkOrdersIndex = () => {
   const { items } = usePage().props;
 
   const columns = prepareColumns([
-    { label: "Number", column: "number" },
+    { label: "Code Number", column: "number" },
     { label: "Title", column: "title" },
     { label: "Subject", column: "subject" },
     { label: "Supplier", column: "supplier" },
