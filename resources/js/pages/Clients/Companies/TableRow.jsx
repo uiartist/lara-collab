@@ -23,22 +23,24 @@ export default function TableRow({ item }) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Group gap='sm'>
-          {item.clients.map(item => (
-            <Link
-              href={route('clients.users.edit', item.id)}
-              key={item.id}
-            >
-              <Badge
-                variant='light'
-                color='orange'
-                tt='unset'
-              >
-                {item.name}
-              </Badge>
-            </Link>
-          ))}
-        </Group>
+        <Text fz='sm'>{item.code_number ?? '—'}</Text>
+        <Text
+          fz='xs'
+          c='dimmed'
+        >
+          Code
+        </Text>
+      </Table.Td>
+      <Table.Td>
+        <Link href={route('clients.companies.users.index', item.id)} style={{ textDecoration: 'none' }}>
+          <Badge
+            variant='light'
+            color='blue'
+            style={{ cursor: 'pointer' }}
+          >
+            {item.users_count} user{item.users_count !== 1 ? 's' : ''}
+          </Badge>
+        </Link>
       </Table.Td>
       {(can('edit client company') ||
         can('archive client company') ||

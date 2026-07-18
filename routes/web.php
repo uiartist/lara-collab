@@ -115,13 +115,27 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     });
 
-    // Clients
+    // Clients - Companies first, then users under each company
     Route::group(['prefix' => 'clients', 'as' => 'clients.'], function () {
-        Route::resource('users', ClientUserController::class)->except(['show']);
-        Route::post('users/{userId}/restore', [ClientUserController::class, 'restore'])->name('users.restore');
+        // Companies list and CRUD
+        Route::get('/', [ClientCompanyController::class, 'index'])->name('companies.index');
+        Route::get('create', [ClientCompanyController::class, 'create'])->name('companies.create');
+        Route::post('/', [ClientCompanyController::class, 'store'])->name('companies.store');
+        Route::get('{company}/edit', [ClientCompanyController::class, 'edit'])->name('companies.edit');
+        Route::put('{company}', [ClientCompanyController::class, 'update'])->name('companies.update');
+        Route::delete('{company}', [ClientCompanyController::class, 'destroy'])->name('companies.destroy');
+        Route::post('{company}/restore', [ClientCompanyController::class, 'restore'])->name('companies.restore');
 
-        Route::resource('companies', ClientCompanyController::class)->except(['show']);
-        Route::post('companies/{companyId}/restore', [ClientCompanyController::class, 'restore'])->name('companies.restore');
+        // Users under a specific company
+        Route::group(['prefix' => '{company}/users', 'as' => 'companies.users.'], function () {
+            Route::get('/', [ClientUserController::class, 'index'])->name('index');
+            Route::get('create', [ClientUserController::class, 'create'])->name('create');
+            Route::post('/', [ClientUserController::class, 'store'])->name('store');
+            Route::get('{user}/edit', [ClientUserController::class, 'edit'])->name('edit');
+            Route::put('{user}', [ClientUserController::class, 'update'])->name('update');
+            Route::delete('{user}', [ClientUserController::class, 'destroy'])->name('destroy');
+            Route::post('{user}/restore', [ClientUserController::class, 'restore'])->name('restore');
+        });
     });
 
     // Users

@@ -45,6 +45,11 @@ class ClientCompany extends Model implements AuditableContract
         'email',
     ];
 
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'client_company_id');
+    }
+
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'client_company', 'client_company_id', 'client_id');

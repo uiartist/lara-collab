@@ -7,18 +7,17 @@ import Layout from "@/layouts/MainLayout";
 import { redirectTo, reloadWithQuery } from "@/utils/route";
 import { actionColumnVisibility, prepareColumns } from "@/utils/table";
 import { usePage } from "@inertiajs/react";
-import { Button, Grid, Group, Table } from "@mantine/core";
+import { Anchor, Button, Grid, Group, Table } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import TableRow from "./TableRow";
 
 const ClientsIndex = () => {
-  const { items } = usePage().props;
+  const { items, company } = usePage().props;
 
   const columns = prepareColumns([
     { label: "User", column: "name" },
     { label: "Code Number", column: "code_number" },
     { label: "Email", column: "email" },
-    { label: "Companies", sortable: false },
     {
       label: "Actions",
       sortable: false,
@@ -27,7 +26,7 @@ const ClientsIndex = () => {
   ]);
 
   const rows = items.data.length ? (
-    items.data.map((item) => <TableRow item={item} key={item.id} />)
+    items.data.map((item) => <TableRow item={item} company={company} key={item.id} />)
   ) : (
     <TableRowEmpty colSpan={columns.length} />
   );
@@ -37,10 +36,22 @@ const ClientsIndex = () => {
 
   return (
     <>
+      <Grid justify="space-between" align="center" mb="lg">
+        <Grid.Col span="auto">
+          <Group gap="xs">
+            <Anchor href={route("clients.companies.index")} underline="hover">
+              Companies
+            </Anchor>
+            <span>/</span>
+            <span>{company.name}</span>
+          </Group>
+        </Grid.Col>
+      </Grid>
+
       <Grid justify="space-between" align="center">
         <Grid.Col span="content">
           <Group>
-            <SearchInput placeholder="Search clients" search={search} />
+            <SearchInput placeholder="Search users" search={search} />
             <ArchivedFilterButton />
           </Group>
         </Grid.Col>
@@ -49,7 +60,7 @@ const ClientsIndex = () => {
             <Button
               leftSection={<IconPlus size={14} />}
               radius="xl"
-              onClick={() => redirectTo("clients.users.create")}
+              onClick={() => redirectTo("clients.companies.users.create", [company.id])}
             >
               Create
             </Button>
@@ -69,6 +80,6 @@ const ClientsIndex = () => {
   );
 };
 
-ClientsIndex.layout = (page) => <Layout title="Clients">{page}</Layout>;
+ClientsIndex.layout = (page) => <Layout title="Company Users">{page}</Layout>;
 
 export default ClientsIndex;

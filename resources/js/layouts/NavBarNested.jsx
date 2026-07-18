@@ -38,7 +38,7 @@ export default function Sidebar() {
         links: [
           {
             label: "Clients",
-            link: route("clients.users.index"),
+            link: route("clients.companies.index"),
             active: route().current("clients.*"),
             visible: can("view client users") || can("view client companies"),
           },
@@ -124,7 +124,7 @@ export default function Sidebar() {
             visible: can("view owner company"),
           },
           {
-            label: "Users",
+            label: "Team",
             link: route("users.index"),
             active: route().current("users.*"),
             visible: can("view users"),

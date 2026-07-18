@@ -23,6 +23,7 @@ class CreateClient
             $user = User::create([
                 'name' => $data['name'],
                 'code_number' => $codeNumber,
+                'client_company_id' => $data['client_company_id'] ?? null,
                 'job_title' => 'Client',
                 'customer_type' => $data['customer_type'] ?? null,
                 'status' => $data['status'] ?? 'Active',

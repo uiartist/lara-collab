@@ -14,7 +14,6 @@ import {
   FileInput,
   Grid,
   Group,
-  MultiSelect,
   NumberInput,
   PasswordInput,
   Select,
@@ -72,11 +71,12 @@ const buildCountryOptions = (countries = []) => {
 const ClientEdit = () => {
   const {
     item,
-    dropdowns: { companies, countries = [] },
+    company,
+    dropdowns: { countries = [] },
   } = usePage().props;
   const countryOptions = buildCountryOptions(countries);
 
-  const [form, submit, updateValue] = useForm("post", route("clients.users.update", item.id), {
+  const [form, submit, updateValue] = useForm("post", route("clients.companies.users.update", [company.id, item.id]), {
     _method: "put",
     avatar: null,
     name: item.name,
@@ -96,7 +96,6 @@ const ClientEdit = () => {
     notes: item.notes || "",
     password: "",
     password_confirmation: "",
-    companies: item.companies.map((i) => i.id.toString()),
   });
 
   const normalizedCountry = String(form.data.country ?? "").trim().toLowerCase();
@@ -105,15 +104,18 @@ const ClientEdit = () => {
   return (
     <>
       <Breadcrumbs fz={14} mb={30}>
-        <Anchor href="#" onClick={() => redirectTo("clients.users.index")} fz={14}>
-          Clients
+        <Anchor href="#" onClick={() => redirectTo("clients.companies.index")} fz={14}>
+          Companies
         </Anchor>
-        <div>Edit</div>
+        <Anchor href="#" onClick={() => redirectTo("clients.companies.users.index", company.id)} fz={14}>
+          {company.name}
+        </Anchor>
+        <div>Edit User</div>
       </Breadcrumbs>
 
       <Grid justify="space-between" align="flex-end" gutter="xl" mb="lg">
         <Grid.Col span="auto">
-          <Title order={1}>Edit client</Title>
+          <Title order={1}>Edit user {item.name}</Title>
         </Grid.Col>
         <Grid.Col span="content"></Grid.Col>
       </Grid>
@@ -282,23 +284,12 @@ const ClientEdit = () => {
 
           <Textarea
             label="Notes"
-            placeholder="Additional client notes"
+            placeholder="Additional user notes"
             mt="md"
             rows={3}
             value={form.data.notes}
             onChange={(e) => updateValue("notes", e.target.value)}
             error={form.errors.notes}
-          />
-
-          <MultiSelect
-            label="Companies"
-            placeholder="Clients companies"
-            required
-            mt="md"
-            value={form.data.companies}
-            onChange={(values) => updateValue("companies", values)}
-            data={companies}
-            error={form.errors.companies}
           />
 
           <Divider mt="xl" mb="md" label="Login credentials" labelPosition="center" />
@@ -332,7 +323,7 @@ const ClientEdit = () => {
           />
 
           <Group justify="space-between" mt="xl">
-            <BackButton route="clients.users.index" />
+            <BackButton route="clients.companies.users.index" params={company.id} />
             <ActionButton loading={form.processing}>Update</ActionButton>
           </Group>
         </form>
@@ -341,6 +332,6 @@ const ClientEdit = () => {
   );
 };
 
-ClientEdit.layout = (page) => <Layout title="Edit client">{page}</Layout>;
+ClientEdit.layout = (page) => <Layout title="Edit User">{page}</Layout>;
 
 export default ClientEdit;

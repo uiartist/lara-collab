@@ -14,7 +14,6 @@ import {
   FileInput,
   Grid,
   Group,
-  MultiSelect,
   NumberInput,
   PasswordInput,
   Select,
@@ -71,11 +70,12 @@ const buildCountryOptions = (countries = []) => {
 
 const ClientCreate = () => {
   const {
-    dropdowns: { companies, countries = [] },
+    dropdowns: { countries = [] },
+    company,
   } = usePage().props;
   const countryOptions = buildCountryOptions(countries);
 
-  const [form, submit, updateValue] = useForm("post", route("clients.users.store"), {
+  const [form, submit, updateValue] = useForm("post", route("clients.companies.users.store", company.id), {
     avatar: null,
     name: "",
     phone: "",
@@ -94,7 +94,6 @@ const ClientCreate = () => {
     notes: "",
     password: "",
     password_confirmation: "",
-    companies: [],
   });
 
   const normalizedCountry = String(form.data.country ?? "").trim().toLowerCase();
@@ -103,15 +102,18 @@ const ClientCreate = () => {
   return (
     <>
       <Breadcrumbs fz={14} mb={30}>
-        <Anchor href="#" onClick={() => redirectTo("clients.users.index")} fz={14}>
-          Clients
+        <Anchor href="#" onClick={() => redirectTo("clients.companies.index")} fz={14}>
+          Companies
         </Anchor>
-        <div>Create</div>
+        <Anchor href="#" onClick={() => redirectTo("clients.companies.users.index", company.id)} fz={14}>
+          {company.name}
+        </Anchor>
+        <div>Create User</div>
       </Breadcrumbs>
 
       <Grid justify="space-between" align="flex-end" gutter="xl" mb="lg">
         <Grid.Col span="auto">
-          <Title order={1}>Create client</Title>
+          <Title order={1}>Create user for {company.name}</Title>
         </Grid.Col>
         <Grid.Col span="content"></Grid.Col>
       </Grid>
@@ -278,29 +280,13 @@ const ClientCreate = () => {
 
           <Textarea
             label="Notes"
-            placeholder="Additional client notes"
+            placeholder="Additional user notes"
             mt="md"
             rows={3}
             value={form.data.notes}
             onChange={(e) => updateValue("notes", e.target.value)}
             error={form.errors.notes}
           />
-
-          <MultiSelect
-            label="Companies"
-            placeholder="Clients companies"
-            mt="md"
-            value={form.data.companies}
-            onChange={(values) => updateValue("companies", values)}
-            data={companies}
-            error={form.errors.companies}
-          />
-
-          {form.data.companies.length === 0 && (
-            <Text c="dimmed" fz="xs" mt="xs">
-              If left empty, you will be asked to create a company after creating the client.
-            </Text>
-          )}
 
           <Divider mt="xl" mb="md" label="Login credentials" labelPosition="center" />
 
@@ -335,7 +321,7 @@ const ClientCreate = () => {
           />
 
           <Group justify="space-between" mt="xl">
-            <BackButton route="clients.users.index" />
+            <BackButton route="clients.companies.users.index" params={company.id} />
             <ActionButton loading={form.processing}>Create</ActionButton>
           </Group>
         </form>
@@ -344,6 +330,6 @@ const ClientCreate = () => {
   );
 };
 
-ClientCreate.layout = (page) => <Layout title="Create client">{page}</Layout>;
+ClientCreate.layout = (page) => <Layout title="Create User">{page}</Layout>;
 
 export default ClientCreate;

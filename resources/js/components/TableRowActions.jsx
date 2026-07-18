@@ -7,6 +7,7 @@ import { openConfirmModal } from "./ConfirmModal";
 export default function TableRowActions({
   item,
   editRoute,
+  editRouteParams,
   editPermission,
   archivePermission,
   restorePermission,
@@ -14,8 +15,12 @@ export default function TableRowActions({
   restore,
   children,
 }) {
-  const archiveForm = useForm("delete", route(archive.route, item.id));
-  const restoreForm = useForm("post", route(restore.route, item.id));
+  // Build route parameters for archive and restore
+  const archiveParams = archive.routeParams ? [...archive.routeParams, item.id] : item.id;
+  const restoreParams = restore.routeParams ? [...restore.routeParams, item.id] : item.id;
+  
+  const archiveForm = useForm("delete", route(archive.route, archiveParams));
+  const restoreForm = useForm("post", route(restore.route, restoreParams));
 
   const openArchiveModal = () =>
     openConfirmModal({
@@ -37,11 +42,18 @@ export default function TableRowActions({
       onConfirm: () => restoreForm.submit(),
     });
 
+  const getEditParams = () => {
+    if (editRouteParams) {
+      return [...editRouteParams, item.id];
+    }
+    return item.id;
+  };
+
   return (
     <Group gap={0} justify="flex-end" wrap="nowrap">
       {children}
       {can(editPermission) && !route().params.archived && (
-        <ActionIcon variant="subtle" color="blue" onClick={() => redirectTo(editRoute, item.id)}>
+        <ActionIcon variant="subtle" color="blue" onClick={() => redirectTo(editRoute, getEditParams())}>
           <IconPencil style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
         </ActionIcon>
       )}

@@ -33,6 +33,8 @@ class ClientResource extends JsonResource
             'payment_terms' => $this->payment_terms,
             'credit_limit' => $this->credit_limit,
             'notes' => $this->notes,
+            'company' => $this->clientCompany ? $this->clientCompany->only(['id', 'name']) : null,
+            'client_company_id' => $this->client_company_id,
             'companies' => $this->clientCompanies->map->only(['id', 'name']),
         ];
     }

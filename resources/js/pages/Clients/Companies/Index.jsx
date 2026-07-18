@@ -17,7 +17,8 @@ const ClientCompaniesIndex = () => {
   const columns = prepareColumns([
     { label: 'Company', column: 'name' },
     { label: 'Email', column: 'email' },
-    { label: 'Clients', sortable: false },
+    { label: 'Code', column: 'code_number' },
+    { label: 'Users', sortable: false },
     {
       label: 'Actions',
       sortable: false,

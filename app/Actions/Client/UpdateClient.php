@@ -15,6 +15,7 @@ class UpdateClient
             'name' => $data['name'],
             'phone' => $data['phone'],
             'email' => $data['email'],
+            'client_company_id' => $data['client_company_id'] ?? null,
             'customer_type' => $data['customer_type'] ?? null,
             'status' => $data['status'] ?? 'Active',
             'designation' => $data['designation'] ?? null,

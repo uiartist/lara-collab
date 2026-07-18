@@ -17,91 +17,91 @@ use Inertia\Response;
 
 class ClientUserController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(ClientCompany $company, Request $request): Response
     {
         abort_if(! $request->user()->can('view client users'), 401);
 
         return Inertia::render('Clients/Users/Index', [
+            'company' => $company,
             'items' => ClientResource::collection(
-                User::searchByQueryString()
+                $company->users()
+                    ->searchByQueryString()
                     ->sortByQueryString()
-                    ->role('client')
-                    ->with('clientCompanies')
                     ->when($request->has('archived'), fn ($query) => $query->onlyArchived())
                     ->paginate(12)
             ),
         ]);
     }
 
-    public function create()
+    public function create(ClientCompany $company)
     {
         abort_if(! request()->user()->can('create client user'), 401);
 
         return Inertia::render('Clients/Users/Create', [
+            'company' => $company,
             'dropdowns' => [
-                'companies' => ClientCompany::dropdownValues(),
                 'countries' => Country::dropdownValues(),
             ],
         ]);
     }
 
-    public function store(StoreClientRequest $request)
+    public function store(ClientCompany $company, StoreClientRequest $request)
     {
         abort_if(! request()->user()->can('create client user'), 401);
 
-        $client = (new CreateClient)->create($request->validated());
+        $data = $request->validated();
+        $data['client_company_id'] = $company->id;
+        
+        $client = (new CreateClient)->create($data);
 
-        if (empty($request->companies)) {
-            return redirect()
-                ->route('clients.companies.create', ['client_id' => $client->id])
-                ->success('Client created', 'A new client was successfully created. Now you can create a company for the client.');
-        }
-
-        return redirect()->route('clients.users.index')->success('Client created', 'A new client was successfully created.');
+        return redirect()->route('clients.companies.users.index', $company->id)->success('User created', 'A new user was successfully created for this company.');
     }
 
-    public function edit(User $user)
+    public function edit(ClientCompany $company, User $user)
     {
         abort_if(! request()->user()->can('edit client user'), 401);
 
         return Inertia::render('Clients/Users/Edit', [
+            'company' => $company,
             'item' => new ClientResource($user),
             'dropdowns' => [
-                'companies' => ClientCompany::dropdownValues(),
                 'countries' => Country::dropdownValues(),
             ],
         ]);
     }
 
-    public function update(User $user, UpdateClientRequest $request)
+    public function update(ClientCompany $company, User $user, UpdateClientRequest $request)
     {
         abort_if(! request()->user()->can('edit client user'), 401);
 
-        (new UpdateClient)->update($user, $request->validated());
+        $data = $request->validated();
+        $data['client_company_id'] = $company->id;
 
-        return redirect()->route('clients.users.index')->success('Client updated', 'The client was successfully updated.');
+        (new UpdateClient)->update($user, $data);
+
+        return redirect()->route('clients.companies.users.index', $company->id)->success('User updated', 'The user was successfully updated.');
     }
 
-    public function destroy(User $user)
+    public function destroy(ClientCompany $company, User $user)
     {
         abort_if(! request()->user()->can('archive client user'), 401);
 
         if (auth()->id() === $user->id) {
-            return redirect()->route('clients.users.index')->warning('Action stopped', 'You cannot archive the client with whom you are currently logged in.');
+            return redirect()->route('clients.companies.users.index', $company->id)->warning('Action stopped', 'You cannot archive the user with whom you are currently logged in.');
         }
         $user->archive();
 
-        return redirect()->back()->success('Client archived', 'The client was successfully archived.');
+        return redirect()->back()->success('User archived', 'The user was successfully archived.');
     }
 
-    public function restore(int $userId)
+    public function restore(ClientCompany $company, int $user)
     {
         abort_if(! request()->user()->can('restore client user'), 401);
 
-        $user = User::withArchived()->findOrFail($userId);
+        $user = User::withArchived()->findOrFail($user);
 
         $user->unArchive();
 
-        return redirect()->back()->success('Client restored', 'The restoring of the client was completed successfully.');
+        return redirect()->back()->success('User restored', 'The restoring of the user was completed successfully.');
     }
 }

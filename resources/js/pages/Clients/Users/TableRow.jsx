@@ -1,9 +1,8 @@
 import TableRowActions from "@/components/TableRowActions";
 import { getInitials } from "@/utils/user";
-import { Link } from "@inertiajs/react";
-import { Avatar, Badge, Group, Table, Text } from "@mantine/core";
+import { Avatar, Table, Text, Group } from "@mantine/core";
 
-export default function TableRow({ item }) {
+export default function TableRow({ item, company }) {
   return (
     <Table.Tr key={item.id}>
       <Table.Td>
@@ -30,37 +29,27 @@ export default function TableRow({ item }) {
           Email
         </Text>
       </Table.Td>
-      <Table.Td>
-        <Group gap="sm">
-          {item.companies.map((item) => (
-            <Link href={route("clients.companies.edit", item.id)} key={item.id}>
-              <Badge variant="light" color="grape" tt="unset">
-                {item.name}
-              </Badge>
-            </Link>
-          ))}
-        </Group>
-      </Table.Td>
       {(can("edit client user") || can("archive client user") || can("restore client user")) && (
         <Table.Td>
           <TableRowActions
             item={item}
-            editRoute="clients.users.edit"
+            editRoute="clients.companies.users.edit"
+            editRouteParams={[company.id]}
             editPermission="edit client user"
             archivePermission="archive client user"
             restorePermission="restore client user"
             archive={{
-              route: "clients.users.destroy",
-              title: "Archive client",
-              content: `Are you sure you want to archive this client? This action will prevent
-                the client from logging in, while all other aspects related to the
-                client's actions will remain unaffected.`,
+              route: "clients.companies.users.destroy",
+              routeParams: [company.id],
+              title: "Archive user",
+              content: `Are you sure you want to archive this user? This action will prevent the user from logging in, while all other aspects related to the user's actions will remain unaffected.`,
               confirmLabel: "Archive",
             }}
             restore={{
-              route: "clients.users.restore",
-              title: "Restore client",
-              content: `Are you sure you want to restore this client? This action will allow the client to login.`,
+              route: "clients.companies.users.restore",
+              routeParams: [company.id],
+              title: "Restore user",
+              content: `Are you sure you want to restore this user? This action will allow the user to login.`,
               confirmLabel: "Restore",
             }}
           />

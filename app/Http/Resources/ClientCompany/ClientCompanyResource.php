@@ -16,6 +16,7 @@ class ClientCompanyResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'code_number' => $this->code_number,
             'name' => $this->name,
             'email' => $this->email,
             'address' => $this->address,
@@ -32,6 +33,8 @@ class ClientCompanyResource extends JsonResource
             'vat' => $this->vat,
             'rate' => $this->rate,
             'currency' => $this->currency,
+            'users' => $this->users->map->only(['id', 'name']),
+            'users_count' => $this->users->count(),
             'clients' => $this->clients->map->only(['id', 'name']),
         ];
     }
