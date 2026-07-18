@@ -7,6 +7,7 @@ use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Http\Resources\Project\ProjectResource;
 use App\Models\ClientCompany;
 use App\Models\Currency;
+use App\Models\EntityCodeNumber;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\ProjectService;
@@ -64,6 +65,11 @@ class ProjectController extends Controller
         $data = $request->validated();
 
         $data['rate'] *= 100;
+
+        $codeNumberSettings = EntityCodeNumber::where('entity_type', 'Project')->first();
+        if ($codeNumberSettings) {
+            $data['code_number'] = $this->generateCodeNumber($codeNumberSettings);
+        }
 
         $project = Project::create($data);
 
@@ -143,5 +149,32 @@ class ProjectController extends Controller
         (new ProjectService($project))->updateUserAccess($userIds);
 
         return redirect()->back();
+    }
+
+    private function generateCodeNumber(EntityCodeNumber $settings): string
+    {
+        $prefix = strtoupper($settings->code_number);
+        $min = $settings->min_range ?? 1;
+        $max = $settings->max_range ?? 999;
+        $width = max(3, strlen((string) max($min, $max - 1)));
+
+        $existingNumbers = Project::withArchived()
+            ->where('code_number', 'like', "$prefix%")
+            ->pluck('code_number')
+            ->map(function ($code) use ($prefix) {
+                $numeric = preg_replace('/^'.preg_quote($prefix, '/').'/', '', $code);
+
+                return preg_match('/^\d+$/', $numeric) ? (int) $numeric : null;
+            })
+            ->filter()
+            ->values();
+
+        $next = $existingNumbers->isNotEmpty() ? $existingNumbers->max() + 1 : $min;
+
+        if ($next > $max) {
+            abort(400, 'Project code number range exceeded.');
+        }
+
+        return $prefix.str_pad($next, $width, '0', STR_PAD_LEFT);
     }
 }

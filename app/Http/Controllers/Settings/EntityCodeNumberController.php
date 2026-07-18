@@ -34,6 +34,7 @@ class EntityCodeNumberController extends Controller
         $entityTypes = [
             'Project' => 'Project',
             'ClientCompany' => 'Client Company',
+            'ClientUser' => 'Client User',
             'Supplier' => 'Supplier',
             'PurchaseRequest' => 'Purchase Request',
             'WorkOrder' => 'Work Order',
@@ -59,6 +60,7 @@ class EntityCodeNumberController extends Controller
         $entityTypes = [
             'Project' => 'Project',
             'ClientCompany' => 'Client Company',
+            'ClientUser' => 'Client User',
             'Supplier' => 'Supplier',
             'PurchaseRequest' => 'Purchase Request',
             'WorkOrder' => 'Work Order',

@@ -27,6 +27,7 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
         'name',
         'email',
         'password',
+        'code_number',
         'job_title',
         'customer_type',
         'status',
@@ -50,6 +51,7 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
         'name',
         'email',
         'job_title',
+        'code_number',
     ];
 
     protected $sortable = [

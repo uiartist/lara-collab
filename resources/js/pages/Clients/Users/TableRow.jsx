@@ -22,6 +22,9 @@ export default function TableRow({ item }) {
         </Group>
       </Table.Td>
       <Table.Td>
+        <Text fz="sm">{item.code_number ?? "—"}</Text>
+      </Table.Td>
+      <Table.Td>
         <Text fz="sm">{item.email}</Text>
         <Text fz="xs" c="dimmed">
           Email
