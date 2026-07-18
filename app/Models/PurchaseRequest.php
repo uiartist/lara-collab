@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use LaravelArchivable\Archivable;
 use Lacodix\LaravelModelFilter\Traits\IsSearchable;
 use Lacodix\LaravelModelFilter\Traits\IsSortable;
+use LaravelArchivable\Archivable;
 
 class PurchaseRequest extends Model
 {
@@ -23,6 +23,7 @@ class PurchaseRequest extends Model
         'subject',
         'created_at',
     ];
+
     protected $fillable = [
         'code_number',
         'task_id',

@@ -138,8 +138,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Work Orders
     Route::get('work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
-Route::delete('work-orders/{purchaseRequest}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
-Route::post('work-orders/{purchaseRequest}/restore', [WorkOrderController::class, 'restore'])->name('work-orders.restore');
+    Route::delete('work-orders/{purchaseRequest}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
+    Route::post('work-orders/{purchaseRequest}/restore', [WorkOrderController::class, 'restore'])->name('work-orders.restore');
 
     // Purchase Requests
     Route::get('purchase-requests/suppliers', [PurchaseRequestController::class, 'suppliers'])->name('purchase-requests.suppliers');

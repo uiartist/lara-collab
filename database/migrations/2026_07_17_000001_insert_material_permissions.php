@@ -23,6 +23,7 @@ return new class extends Migration
             $permission = DB::table('permissions')->where('name', $name)->first();
             if ($permission) {
                 $insertedIds[$name] = $permission->id;
+
                 continue;
             }
 
