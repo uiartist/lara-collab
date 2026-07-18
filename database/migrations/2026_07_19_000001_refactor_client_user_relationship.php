@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add client_company_id foreign key to users table if it doesn't exist
-        if (!Schema::hasColumn('users', 'client_company_id')) {
+        if (! Schema::hasColumn('users', 'client_company_id')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->foreignId('client_company_id')->nullable()->after('id')->constrained('client_companies')->onDelete('cascade');
             });
@@ -21,7 +21,7 @@ return new class extends Migration
 
         // Migrate data from pivot table to foreign key
         // For each user-company mapping in the pivot table, set the first one as the primary company
-        DB::statement("
+        DB::statement('
             UPDATE users u
             SET u.client_company_id = (
                 SELECT client_company_id FROM client_company
@@ -32,7 +32,7 @@ return new class extends Migration
                 SELECT DISTINCT client_id FROM client_company
             )
             AND u.client_company_id IS NULL
-        ");
+        ');
     }
 
     /**

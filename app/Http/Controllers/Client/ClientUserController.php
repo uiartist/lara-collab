@@ -51,7 +51,7 @@ class ClientUserController extends Controller
 
         $data = $request->validated();
         $data['client_company_id'] = $company->id;
-        
+
         $client = (new CreateClient)->create($data);
 
         return redirect()->route('clients.companies.users.index', $company->id)->success('User created', 'A new user was successfully created for this company.');
