@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             CountrySeeder::class,
             DepartmentSeeder::class,
+            UserLevelSeeder::class,
+            MaterialEntityCodeSeeder::class,
+            ClientLevelRoleSeeder::class,
         ]);
 
         if ($this->command->confirm('Seed development data?', false)) {
@@ -28,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 OwnerCompanySeeder::class,
                 ClientSeeder::class,
                 ClientCompanySeeder::class,
+                MaterialSeeder::class,
             ]);
 
             auth()->setUser(User::role('admin')->first());

@@ -14,6 +14,7 @@ import {
   FileInput,
   Grid,
   Group,
+  MultiSelect,
   NumberInput,
   PasswordInput,
   Select,
@@ -72,7 +73,7 @@ const ClientEdit = () => {
   const {
     item,
     company,
-    dropdowns: { countries = [] },
+    dropdowns: { countries = [], userLevels = [], projects = [] },
   } = usePage().props;
   const countryOptions = buildCountryOptions(countries);
 
@@ -81,6 +82,7 @@ const ClientEdit = () => {
     avatar: null,
     name: item.name,
     phone: item.phone || "",
+    username: item.username || "",
     customer_type: item.customer_type || "",
     status: item.status || "Active",
     designation: item.designation || "",
@@ -94,6 +96,8 @@ const ClientEdit = () => {
     payment_terms: item.payment_terms || "",
     credit_limit: item.credit_limit || "",
     notes: item.notes || "",
+    level: item.level || "",
+    projects: item.assigned_projects || [],
     password: "",
     password_confirmation: "",
   });
@@ -172,6 +176,16 @@ const ClientEdit = () => {
             error={form.errors.phone}
           />
 
+          <TextInput
+            label="Username"
+            placeholder="Unique username"
+            required
+            mt="md"
+            value={form.data.username}
+            onChange={(e) => updateValue("username", e.target.value)}
+            error={form.errors.username}
+          />
+
           <Select
             label="Customer Type"
             placeholder="Select customer type"
@@ -180,6 +194,29 @@ const ClientEdit = () => {
             value={form.data.customer_type}
             onChange={(value) => updateValue("customer_type", value ?? "")}
             error={form.errors.customer_type}
+            clearable
+          />
+
+          <Select
+            label="Level"
+            placeholder="Select user level"
+            mt="md"
+            data={userLevels}
+            value={form.data.level}
+            onChange={(value) => updateValue("level", value ?? "")}
+            error={form.errors.level}
+            clearable
+          />
+
+          <MultiSelect
+            label="Project Access"
+            placeholder="Select projects this user can access"
+            mt="md"
+            data={projects}
+            value={form.data.projects}
+            onChange={(value) => updateValue("projects", value ?? [])}
+            error={form.errors.projects}
+            searchable
             clearable
           />
 

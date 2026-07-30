@@ -14,6 +14,7 @@ import {
   FileInput,
   Grid,
   Group,
+  MultiSelect,
   NumberInput,
   PasswordInput,
   Select,
@@ -70,7 +71,7 @@ const buildCountryOptions = (countries = []) => {
 
 const ClientCreate = () => {
   const {
-    dropdowns: { countries = [] },
+    dropdowns: { countries = [], userLevels = [], projects = [] },
     company,
   } = usePage().props;
   const countryOptions = buildCountryOptions(countries);
@@ -79,6 +80,7 @@ const ClientCreate = () => {
     avatar: null,
     name: "",
     phone: "",
+    username: "",
     customer_type: "",
     status: "Active",
     designation: "",
@@ -92,6 +94,8 @@ const ClientCreate = () => {
     payment_terms: "",
     credit_limit: "",
     notes: "",
+    level: "",
+    projects: [],
     password: "",
     password_confirmation: "",
   });
@@ -168,6 +172,16 @@ const ClientCreate = () => {
             error={form.errors.phone}
           />
 
+          <TextInput
+            label="Username"
+            placeholder="Unique username"
+            required
+            mt="md"
+            value={form.data.username}
+            onChange={(e) => updateValue("username", e.target.value)}
+            error={form.errors.username}
+          />
+
           <Select
             label="Customer Type"
             placeholder="Select customer type"
@@ -176,6 +190,29 @@ const ClientCreate = () => {
             value={form.data.customer_type}
             onChange={(value) => updateValue("customer_type", value ?? "")}
             error={form.errors.customer_type}
+            clearable
+          />
+
+          <Select
+            label="Level"
+            placeholder="Select user level"
+            mt="md"
+            data={userLevels}
+            value={form.data.level}
+            onChange={(value) => updateValue("level", value ?? "")}
+            error={form.errors.level}
+            clearable
+          />
+
+          <MultiSelect
+            label="Project Access"
+            placeholder="Select projects this user can access"
+            mt="md"
+            data={projects}
+            value={form.data.projects}
+            onChange={(value) => updateValue("projects", value ?? [])}
+            error={form.errors.projects}
+            searchable
             clearable
           />
 

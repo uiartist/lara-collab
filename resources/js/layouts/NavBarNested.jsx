@@ -17,17 +17,26 @@ import UserButton from "./UserButton";
 import classes from "./css/NavBarNested.module.css";
 
 export default function Sidebar() {
-  const { version } = usePage().props;
+  const { version, auth } = usePage().props;
   const { items, setItems } = useNavigationStore();
+  const isClientUser = auth?.user?.roles?.some((r) => r.name === "client");
+  const clientCompanyId = auth?.user?.client_companies?.[0]?.id;
 
   useEffect(() => {
-    setItems([
+    const navigationItems = [
       {
         label: "Dashboard",
         icon: IconGauge,
         link: route("dashboard"),
         active: route().current("dashboard"),
         visible: true,
+      },
+      {
+        label: "My Team",
+        icon: IconUsers,
+        link: clientCompanyId ? route("clients.companies.users.index", clientCompanyId) : "#",
+        active: route().current("clients.companies.users.*"),
+        visible: isClientUser && clientCompanyId,
       },
       {
         label: "Master Data",
@@ -119,21 +128,29 @@ export default function Sidebar() {
         links: [
           {
             label: "Company",
-            link: route("settings.company.edit"),
-            active: route().current("settings.company.*"),
-            visible: can("view owner company"),
-          },
-          {
-            label: "Team",
-            link: route("users.index"),
-            active: route().current("users.*"),
-            visible: can("view users"),
-          },
-          {
-            label: "Roles",
-            link: route("settings.roles.index"),
-            active: route().current("settings.roles.*"),
-            visible: can("view roles"),
+            active: route().current("settings.company.*") || route().current("users.*") || route().current("settings.roles.*"),
+            opened: route().current("settings.company.*") || route().current("users.*") || route().current("settings.roles.*"),
+            visible: can("view owner company") || can("view users") || can("view roles"),
+            links: [
+              {
+                label: "Company Details",
+                link: route("settings.company.edit"),
+                active: route().current("settings.company.*"),
+                visible: can("view owner company"),
+              },
+              {
+                label: "Team",
+                link: route("users.index"),
+                active: route().current("users.*"),
+                visible: can("view users"),
+              },
+              {
+                label: "Team Roles",
+                link: route("settings.roles.index"),
+                active: route().current("settings.roles.*"),
+                visible: can("view roles"),
+              },
+            ],
           },
           {
             label: "Labels",
@@ -168,7 +185,9 @@ export default function Sidebar() {
           },
         ],
       },
-    ]);
+    ];
+
+    setItems(navigationItems);
   }, []);
 
   return (

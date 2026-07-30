@@ -1,6 +1,19 @@
 import TableRowActions from "@/components/TableRowActions";
 import { getInitials } from "@/utils/user";
-import { Avatar, Table, Text, Group } from "@mantine/core";
+import { Avatar, Table, Text, Group, Badge } from "@mantine/core";
+
+const levelLabels = {
+  "001": "President",
+  "002": "Vice President",
+  "003": "Supervisor",
+  "004": "Manager",
+  "005": "Senior Executive",
+  "006": "Executive",
+  "007": "Coordinator",
+  "008": "Assistant",
+  "009": "Trainee",
+  "010": "Consultant",
+};
 
 export default function TableRow({ item, company }) {
   return (
@@ -22,6 +35,15 @@ export default function TableRow({ item, company }) {
       </Table.Td>
       <Table.Td>
         <Text fz="sm">{item.code_number ?? "—"}</Text>
+      </Table.Td>
+      <Table.Td>
+        {item.level ? (
+          <Badge size="sm" variant="light">
+            {levelLabels[item.level] || item.level}
+          </Badge>
+        ) : (
+          <Text fz="sm" c="dimmed">—</Text>
+        )}
       </Table.Td>
       <Table.Td>
         <Text fz="sm">{item.email}</Text>

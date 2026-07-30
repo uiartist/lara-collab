@@ -61,6 +61,10 @@ class PurchaseRequest extends Model
         'notes',
         'related_task_ids',
         'sent_at',
+        'status',
+        'approved_by_id',
+        'approved_at',
+        'approval_notes',
     ];
 
     protected $casts = [
@@ -73,6 +77,7 @@ class PurchaseRequest extends Model
         'material_items' => 'array',
         'related_task_ids' => 'array',
         'sent_at' => 'datetime',
+        'approved_at' => 'datetime',
     ];
 
     public function task(): BelongsTo
@@ -88,6 +93,11 @@ class PurchaseRequest extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_id');
     }
 
     public function attachments(): HasMany

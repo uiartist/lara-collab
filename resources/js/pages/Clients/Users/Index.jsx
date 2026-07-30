@@ -17,6 +17,7 @@ const ClientsIndex = () => {
   const columns = prepareColumns([
     { label: "User", column: "name" },
     { label: "Code Number", column: "code_number" },
+    { label: "Level", column: "level" },
     { label: "Email", column: "email" },
     {
       label: "Actions",

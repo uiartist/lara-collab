@@ -20,6 +20,9 @@ class PurchaseRequestController extends Controller
     public function store(Request $request, Task $task): JsonResponse
     {
         $this->authorize('create', PurchaseRequest::class);
+        
+        // Verify user has access to the task's project (client users must have explicit project access)
+        $this->authorize('viewAny', [Task::class, $task->project]);
 
         $validated = $request->validate([
             'supplier_id' => ['required', 'exists:suppliers,id'],
@@ -145,6 +148,19 @@ class PurchaseRequestController extends Controller
         }
 
         return response()->json(['message' => 'Purchase request sent successfully.']);
+    }
+
+    public function approve(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
+    {
+        $this->authorize('approve', $purchaseRequest);
+
+        $purchaseRequest->update([
+            'approved_by_id' => $request->user()->id,
+            'approved_at' => now(),
+            'status' => 'Approved',
+        ]);
+
+        return response()->json(['message' => 'Work order approved successfully.']);
     }
 
     public function suppliers(): JsonResponse

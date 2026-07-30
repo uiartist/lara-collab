@@ -23,7 +23,7 @@ class WorkOrderController extends Controller
 
     public function destroy(Request $request, PurchaseRequest $purchaseRequest)
     {
-        $this->authorize('archive purchase request');
+        $this->authorize('archive', $purchaseRequest);
 
         $purchaseRequest->archive();
 
@@ -32,9 +32,9 @@ class WorkOrderController extends Controller
 
     public function restore(Request $request, int $purchaseRequestId)
     {
-        $this->authorize('restore purchase request');
-
         $purchaseRequest = PurchaseRequest::withArchived()->findOrFail($purchaseRequestId);
+
+        $this->authorize('restore', $purchaseRequest);
 
         $purchaseRequest->unArchive();
 

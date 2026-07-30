@@ -27,6 +27,7 @@ class StoreClientRequest extends FormRequest
         return [
             'name' => 'required|string',
             'phone' => 'string|nullable',
+            'username' => 'required|string|max:100|unique:users,username',
             'customer_type' => 'nullable|string|max:100',
             'status' => 'nullable|string|max:50',
             'designation' => 'nullable|string|max:100',
@@ -40,9 +41,12 @@ class StoreClientRequest extends FormRequest
             'payment_terms' => 'nullable|string|max:255',
             'credit_limit' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:2000',
+            'level' => 'nullable|string|max:100',
             'password' => 'required|min:8|confirmed',
             'avatar' => [File::image(), 'nullable'],
             'companies' => 'array',
+            'projects' => 'nullable|array',
+            'projects.*' => 'integer|exists:projects,id',
         ];
     }
 }

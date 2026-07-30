@@ -15,6 +15,7 @@ class UpdateClient
             'name' => $data['name'],
             'phone' => $data['phone'],
             'email' => $data['email'],
+            'username' => $data['username'],
             'client_company_id' => $data['client_company_id'] ?? null,
             'customer_type' => $data['customer_type'] ?? null,
             'status' => $data['status'] ?? 'Active',
@@ -28,6 +29,7 @@ class UpdateClient
             'payment_terms' => $data['payment_terms'] ?? null,
             'credit_limit' => $data['credit_limit'] ?? null,
             'notes' => $data['notes'] ?? null,
+            'level' => $data['level'] ?? null,
         ];
 
         if (! $user->code_number) {
@@ -37,16 +39,32 @@ class UpdateClient
             }
         }
 
-        if ($user->avatar === null || $data['avatar']) {
-            $newData['avatar'] = UserService::storeOrFetchAvatar($user, $data['avatar']);
+        if ($user->avatar === null || ($data['avatar'] ?? null)) {
+            $newData['avatar'] = UserService::storeOrFetchAvatar($user, $data['avatar'] ?? null);
         }
 
         if (! empty($data['password'])) {
             $newData['password'] = Hash::make($data['password']);
         }
 
+        // Update client level role if level has changed
+        if (!empty($data['level'])) {
+            // Remove any existing client level roles
+            $user->roles()->where('name', 'like', 'client_level_%')->detach();
+            
+            // Assign new client level role
+            $levelCode = str_pad($data['level'], 3, '0', STR_PAD_LEFT);
+            $levelRole = "client_level_{$levelCode}";
+            $user->assignRole($levelRole);
+        }
+
         if (! empty($data['companies'])) {
             $user->clientCompanies()->sync($data['companies']);
+        }
+
+        // Sync project access
+        if (isset($data['projects'])) {
+            $user->clientUserProjects()->sync($data['projects']);
         }
 
         return $user->update($newData);

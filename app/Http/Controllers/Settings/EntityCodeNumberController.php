@@ -40,6 +40,8 @@ class EntityCodeNumberController extends Controller
             'WorkOrder' => 'Work Order',
             'OwnerCompany' => 'Owner Company',
             'Development' => 'Development',
+            'UserLevel' => 'User Level',
+            'Material' => 'Material',
         ];
 
         return Inertia::render('Settings/EntityCodeNumbers/Create', [
@@ -66,6 +68,8 @@ class EntityCodeNumberController extends Controller
             'WorkOrder' => 'Work Order',
             'OwnerCompany' => 'Owner Company',
             'Development' => 'Development',
+            'UserLevel' => 'User Level',
+            'Material' => 'Material',
         ];
 
         return Inertia::render('Settings/EntityCodeNumbers/Edit', [

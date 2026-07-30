@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import HierarchyCostsModal from '@/components/HierarchyCostsModal';
 import HierarchyDatesModal from '@/components/HierarchyDatesModal';
+import TaskLaborModal from '@/components/TaskLaborModal';
 import Comments from './Comments';
 import HierarchyPanel from './HierarchyPanel';
 import LabelsDropdown from './LabelsDropdown';
@@ -54,6 +55,7 @@ export function EditTaskDrawer() {
   const [costsOpened, setCostsOpened] = useState(false);
   const [costsVersion, setCostsVersion] = useState(0);
   const [datesOpened, setDatesOpened] = useState(false);
+  const [laborOpened, setLaborOpened] = useState(false);
 
   const [data, setData] = useState({
     group_id: '',
@@ -192,15 +194,17 @@ export function EditTaskDrawer() {
           </Breadcrumbs>
           <div style={{ gap: "10px" }} className='ms-4 d-flex justify-content-between'>
             <div>
-            <button type="button" className="btn btn-primary me-4">Labor</button>
+            <button type="button" className="btn btn-primary me-4" onClick={() => setLaborOpened(true)}>Labor</button>
             <button type="button" className="btn btn-warning me-4" onClick={() => setDatesOpened(true)}>Time</button>
             <button type="button" className="btn btn-success me-4" onClick={() => setCostsOpened(true)}>Costs</button>
             <button type="button" className="btn btn-secondary me-4">Material</button>
             <button type="button" className="btn btn-info me-4">Inventory</button>
+            <button type="button" className="btn btn-info me-4">Misc Costs</button>
             <button type="button" className="btn btn-info me-4">Reports</button>
             </div>
             <HierarchyCostsModal opened={costsOpened} onClose={() => setCostsOpened(false)} projectId={task.project_id} task={task} onCostChanged={() => setCostsVersion(v => v + 1)} />
             <HierarchyDatesModal opened={datesOpened} onClose={() => setDatesOpened(false)} projectId={task.project_id} task={task} />
+            <TaskLaborModal opened={laborOpened} onClose={() => setLaborOpened(false)} task={task} users={usersWithAccessToProject} />
             <button type="button" className="btn btn-success">Save</button>
           </div>
 

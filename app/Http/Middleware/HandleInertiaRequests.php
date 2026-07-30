@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
                     /** @var User */
                     $user = auth()->user();
 
-                    return [
+                    $userData = [
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
@@ -54,6 +54,13 @@ class HandleInertiaRequests extends Middleware
                         'roles' => $user->getRoleNames(),
                         'permissions' => $user->getAllPermissions()->pluck('name'),
                     ];
+
+                    // Add client companies if user is a client
+                    if ($user->hasRole('client')) {
+                        $userData['client_companies'] = $user->clientCompanies()->get(['id', 'name'])->toArray();
+                    }
+
+                    return $userData;
                 },
                 'notifications' => NotificationService::getLatest(6),
             ],

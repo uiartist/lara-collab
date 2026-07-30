@@ -24,14 +24,20 @@ class UpdateClientRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('user');
+        if (is_object($userId)) {
+            $userId = $userId->id;
+        }
+
         return [
             'name' => 'required|string',
             'phone' => 'string|nullable',
+            'username' => ['nullable', 'string', 'max:100', Rule::unique('users')->ignore($userId)],
             'customer_type' => 'nullable|string|max:100',
             'status' => 'nullable|string|max:50',
             'designation' => 'nullable|string|max:100',
             'mobile_number' => 'nullable|string|max:50',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($this->route('user')->id)],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($userId)],
             'website' => 'nullable|url|max:255',
             'country' => 'nullable|string|max:100',
             'gst_vat_number' => 'nullable|string|max:100',
@@ -40,9 +46,12 @@ class UpdateClientRequest extends FormRequest
             'payment_terms' => 'nullable|string|max:255',
             'credit_limit' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:2000',
+            'level' => 'nullable|string|max:100',
             'password' => 'nullable|min:8|confirmed',
             'avatar' => [File::image(), 'nullable'],
-            'companies' => 'required|array|min:1',
+            'companies' => 'nullable|array',
+            'projects' => 'nullable|array',
+            'projects.*' => 'integer|exists:projects,id',
         ];
     }
 }

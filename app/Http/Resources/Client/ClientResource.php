@@ -18,6 +18,7 @@ class ClientResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'username' => $this->username,
             'code_number' => $this->code_number,
             'avatar' => $this->avatar,
             'phone' => $this->phone,
@@ -33,9 +34,11 @@ class ClientResource extends JsonResource
             'payment_terms' => $this->payment_terms,
             'credit_limit' => $this->credit_limit,
             'notes' => $this->notes,
+            'level' => $this->level,
             'company' => $this->clientCompany ? $this->clientCompany->only(['id', 'name']) : null,
             'client_company_id' => $this->client_company_id,
             'companies' => $this->clientCompanies->map->only(['id', 'name']),
+            'assigned_projects' => $this->clientUserProjects->pluck('id')->map(fn ($id) => (string) $id),
         ];
     }
 }

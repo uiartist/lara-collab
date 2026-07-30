@@ -27,6 +27,8 @@ class AuthServiceProvider extends ServiceProvider
         Supplier::class => SupplierPolicy::class,
         PurchaseRequest::class => PurchaseRequestPolicy::class,
         EntityCodeNumber::class => EntityCodeNumberPolicy::class,
+        App\Models\ClientCompany::class => App\Policies\ClientCompanyPolicy::class,
+        App\Models\User::class => App\Policies\ClientUserPolicy::class,
     ];
 
     /**

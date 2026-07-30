@@ -25,6 +25,7 @@ class CreateClient
                 'code_number' => $codeNumber,
                 'client_company_id' => $data['client_company_id'] ?? null,
                 'job_title' => 'Client',
+                'username' => $data['username'],
                 'customer_type' => $data['customer_type'] ?? null,
                 'status' => $data['status'] ?? 'Active',
                 'designation' => $data['designation'] ?? null,
@@ -40,15 +41,28 @@ class CreateClient
                 'payment_terms' => $data['payment_terms'] ?? null,
                 'credit_limit' => $data['credit_limit'] ?? null,
                 'notes' => $data['notes'] ?? null,
+                'level' => $data['level'] ?? null,
                 'password' => Hash::make($data['password']),
             ]);
 
-            $user->update(['avatar' => UserService::storeOrFetchAvatar($user, $data['avatar'])]);
+            $user->update(['avatar' => UserService::storeOrFetchAvatar($user, $data['avatar'] ?? null)]);
 
             $user->assignRole('client');
 
+            // Assign client level role based on level
+            if (!empty($data['level'])) {
+                $levelCode = str_pad($data['level'], 3, '0', STR_PAD_LEFT);
+                $levelRole = "client_level_{$levelCode}";
+                $user->assignRole($levelRole);
+            }
+
             if (! empty($data['companies'])) {
                 $user->clientCompanies()->attach($data['companies']);
+            }
+
+            // Assign project access
+            if (! empty($data['projects'])) {
+                $user->clientUserProjects()->attach($data['projects']);
             }
 
             UserCreated::dispatch($user, $data['password']);

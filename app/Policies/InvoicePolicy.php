@@ -24,11 +24,34 @@ class InvoicePolicy
     }
 
     /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Invoice $model): bool
+    {
+        if (!$user->hasPermissionTo('view invoices')) {
+            return false;
+        }
+
+        // For client users, verify access to at least one project in the invoice
+        if ($user->isClientUser()) {
+            $invoiceProjectIds = $model->tasks()->pluck('project_id')->unique();
+            if ($invoiceProjectIds->isEmpty()) {
+                return false; // Invoice has no tasks/projects
+            }
+            return $user->clientUserProjects()
+                ->whereIn('project_id', $invoiceProjectIds)
+                ->exists();
+        }
+
+        return true;
+    }
+
+    /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('edit invoice');
+        return $this->view($user, $model) && $user->hasPermissionTo('edit invoice');
     }
 
     /**
@@ -36,7 +59,7 @@ class InvoicePolicy
      */
     public function delete(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('archive invoice');
+        return $this->view($user, $model) && $user->hasPermissionTo('archive invoice');
     }
 
     /**
@@ -44,7 +67,7 @@ class InvoicePolicy
      */
     public function restore(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('restore invoice');
+        return $this->view($user, $model) && $user->hasPermissionTo('restore invoice');
     }
 
     /**
@@ -52,7 +75,7 @@ class InvoicePolicy
      */
     public function changeStatus(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('change invoice status');
+        return $this->view($user, $model) && $user->hasPermissionTo('change invoice status');
     }
 
     /**
@@ -60,7 +83,7 @@ class InvoicePolicy
      */
     public function download(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('download invoice');
+        return $this->view($user, $model) && $user->hasPermissionTo('download invoice');
     }
 
     /**
@@ -68,6 +91,6 @@ class InvoicePolicy
      */
     public function print(User $user, Invoice $model): bool
     {
-        return $user->hasPermissionTo('print invoice');
+        return $this->view($user, $model) && $user->hasPermissionTo('print invoice');
     }
 }

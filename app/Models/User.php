@@ -27,6 +27,7 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
         'code_number',
         'job_title',
@@ -44,6 +45,7 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
         'payment_terms',
         'credit_limit',
         'notes',
+        'level',
         'rate',
         'google_id',
     ];
@@ -97,6 +99,14 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
     }
 
     /**
+     * Projects that client user has access to
+     */
+    public function clientUserProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'client_user_project_access', 'user_id', 'project_id')->withTimestamps();
+    }
+
+    /**
      * Projects that user can access
      */
     public function projects(): BelongsToMany
@@ -111,9 +121,39 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
 
     public function hasProjectAccess(Project $project): bool
     {
+        // For client users, check if they have explicit access via client_user_project_access
+        if ($this->isClientUser()) {
+            return $this->clientUserProjects()->where('project_id', $project->id)->exists();
+        }
+
+        // For internal staff, use existing permission service
         $users = PermissionService::usersWithAccessToProject($project);
 
         return $users->pluck('id')->contains($this->id);
+    }
+
+    public function isClientUser(): bool
+    {
+        return $this->hasRole('client');
+    }
+
+    public function getClientLevel(): ?string
+    {
+        if (!$this->isClientUser()) {
+            return null;
+        }
+
+        // Extract level from client_level_XXX role
+        $levelRole = $this->roles()
+            ->where('is_client_level_role', true)
+            ->first();
+
+        if ($levelRole) {
+            // Extract the level code from role name (e.g., "client_level_001" -> "001")
+            return str_replace('client_level_', '', $levelRole->name);
+        }
+
+        return null;
     }
 
     public static function userDropdownValues($exclude = ['client']): array
