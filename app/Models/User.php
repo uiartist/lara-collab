@@ -103,7 +103,9 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
      */
     public function clientUserProjects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'client_user_project_access', 'user_id', 'project_id')->withTimestamps();
+        return $this->belongsToMany(Project::class, 'client_user_project_access', 'user_id', 'project_id')
+            ->withTimestamps()
+            ->select('projects.*');
     }
 
     /**
@@ -134,7 +136,7 @@ class User extends Authenticatable implements AuditableContract, CanResetPasswor
 
     public function isClientUser(): bool
     {
-        return $this->hasRole('client');
+        return $this->hasRole('client') || $this->roles()->where('is_client_level_role', true)->exists();
     }
 
     public function getClientLevel(): ?string

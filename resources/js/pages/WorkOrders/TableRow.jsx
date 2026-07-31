@@ -12,6 +12,12 @@ export default function TableRow({ item }) {
         <Text fz="sm">{item.title ?? "-"}</Text>
       </Table.Td>
       <Table.Td>
+        <Text fz="sm">{item.task ?? "-"}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text fz="sm">{item.project ?? "-"}</Text>
+      </Table.Td>
+      <Table.Td>
         <Text fz="sm">{item.subject ?? "-"}</Text>
       </Table.Td>
       <Table.Td>

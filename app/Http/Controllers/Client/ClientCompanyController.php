@@ -29,7 +29,7 @@ class ClientCompanyController extends Controller
             'items' => ClientCompanyResource::collection(
                 ClientCompany::searchByQueryString()
                     ->sortByQueryString()
-                    ->with(['users', 'currency'])
+                    ->with(['users', 'currency', 'projects'])
                     ->when($request->has('archived'), fn ($query) => $query->onlyArchived())
                     ->paginate(12)
             ),

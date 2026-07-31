@@ -28,6 +28,7 @@ class PermissionService
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
             'Activities' => ['view activities'],
             'Code Number' => ['view code numbers', 'create code number', 'edit code number', 'delete code number'],
+            'Work Orders' => ['view work orders', 'view work order', 'create work order', 'approve work order'],
         ],
         'manager' => [
             'User' => ['view users'],
@@ -38,6 +39,7 @@ class PermissionService
                 'view time logs', 'view comments', 'view costs', 'add costs', 'delete costs',
             ],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
+            'Work Orders' => ['view work orders', 'view work order', 'create work order', 'approve work order'],
         ],
         'developer' => [
             'Project' => ['view projects', 'view project'],

@@ -115,7 +115,21 @@ const TasksIndex = () => {
                 </DragDropContext>
               </>
             ) : (
-              <EmptyResult title="No tasks found" subtitle="or none match your search criteria" />
+              <>
+                <EmptyResult title="No tasks found" subtitle="or none match your search criteria" />
+                {!route().params.archived && can("create task group") && (
+                  <Button
+                    leftSection={<IconPlus size={14} />}
+                    variant="outline"
+                    size="sm"
+                    mt="md"
+                    onClick={CreateTasksGroupModal}
+                    radius="xl"
+                  >
+                    Add tasks group
+                  </Button>
+                )}
+              </>
             )}
           </Grid.Col>
         ) : (

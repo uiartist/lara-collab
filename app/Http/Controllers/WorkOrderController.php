@@ -12,11 +12,23 @@ class WorkOrderController extends Controller
 {
     public function index(Request $request): Response
     {
+        $query = PurchaseRequest::searchByQueryString()
+            ->sortByQueryString()
+            ->with('task.project');
+
+        if (! $request->user()->can('view work orders')) {
+            $query->whereRaw('0 = 1');
+        } elseif ($request->user()->isClientUser()) {
+            $projectIds = $request->user()->clientUserProjects()->pluck('id');
+
+            $query->whereHas('task.project', function ($projectQuery) use ($projectIds) {
+                $projectQuery->whereIn('projects.id', $projectIds);
+            });
+        }
+
         return Inertia::render('WorkOrders/Index', [
             'items' => PurchaseRequestResource::collection(
-                PurchaseRequest::searchByQueryString()
-                    ->sortByQueryString()
-                    ->paginate(12)
+                $query->paginate(12)
             ),
         ]);
     }

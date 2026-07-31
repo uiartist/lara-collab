@@ -18,6 +18,7 @@ const ClientCompaniesIndex = () => {
     { label: 'Company', column: 'name' },
     { label: 'Email', column: 'email' },
     { label: 'Code', column: 'code_number' },
+    { label: 'Projects', sortable: false },
     { label: 'Users', sortable: false },
     {
       label: 'Actions',

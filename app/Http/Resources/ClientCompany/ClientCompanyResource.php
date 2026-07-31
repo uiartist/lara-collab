@@ -36,6 +36,8 @@ class ClientCompanyResource extends JsonResource
             'users' => $this->users->map->only(['id', 'name']),
             'users_count' => $this->users->count(),
             'clients' => $this->clients->map->only(['id', 'name']),
+            'projects' => $this->projects->map->only(['id', 'name']),
+            'projects_count' => $this->projects->count(),
         ];
     }
 }

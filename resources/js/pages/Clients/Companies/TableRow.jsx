@@ -32,6 +32,19 @@ export default function TableRow({ item }) {
         </Text>
       </Table.Td>
       <Table.Td>
+        <Text fz='sm'>
+          {item.projects && item.projects.length > 0
+            ? item.projects.map((project) => project.name).join(', ')
+            : '—'}
+        </Text>
+        <Text
+          fz='xs'
+          c='dimmed'
+        >
+          Projects
+        </Text>
+      </Table.Td>
+      <Table.Td>
         <Link href={route('clients.companies.users.index', item.id)} style={{ textDecoration: 'none' }}>
           <Badge
             variant='light'

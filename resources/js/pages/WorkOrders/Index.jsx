@@ -17,6 +17,8 @@ const WorkOrdersIndex = () => {
   const columns = prepareColumns([
     { label: "Code Number", column: "number" },
     { label: "Title", column: "title" },
+    { label: "Task", column: "task" },
+    { label: "Project", column: "project" },
     { label: "Subject", column: "subject" },
     { label: "Supplier", column: "supplier" },
     { label: "Created", column: "created_at" },

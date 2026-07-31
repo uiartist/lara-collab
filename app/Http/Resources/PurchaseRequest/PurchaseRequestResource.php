@@ -14,6 +14,8 @@ class PurchaseRequestResource extends JsonResource
             'title' => $this->subject,
             'subject' => $this->subject,
             'supplier' => $this->supplier ? $this->supplier->name : 'N/A',
+            'task' => $this->task ? $this->task->name : 'N/A',
+            'project' => $this->task && $this->task->project ? $this->task->project->name : 'N/A',
             'created_at' => $this->created_at,
         ];
     }
